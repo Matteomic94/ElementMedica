@@ -1,0 +1,114 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Sezioni Critiche del Codice
+
+Questo documento identifica e descrive le sezioni critiche del codice che richiedono particolare attenzione durante lo sviluppo e la manutenzione.
+
+## Configurazione Server
+
+**File**: `src/services/api.ts` e `src/config/api/index.ts`
+
+```typescript
+// NON MODIFICARE: Configurazione base URL per i server
+export const API_BASE_URL = 'http://localhost:4003'; // Proxy server
+```
+
+**Perché è critico**: Modificare questa configurazione può causare errori di comunicazione con i server backend. Tutti i servizi sono configurati per utilizzare questo punto di ingresso centralizzato.
+
+## Interazione tra Server
+
+**File**: `src/services/apiClient.ts`
+
+Questo file contiene la logica per gestire le comunicazioni tra il Proxy Server e i server specifici (API Server e Documents Server). Le modifiche devono essere apportate con estrema cautela.
+
+## Gestione Autenticazione
+
+**File**: `src/services/auth.ts` e `src/context/AuthContext.tsx`
+
+Questi file gestiscono l'autenticazione e l'autorizzazione. Le modifiche inappropriate possono compromettere la sicurezza dell'applicazione.
+
+```typescript
+// NON MODIFICARE: Gestione token di autenticazione
+export function getToken() {
+  return localStorage.getItem('auth_token');
+}
+```
+
+## Gestione Errori Centralizzata
+
+**File**: `src/hooks/useErrorHandler.ts`
+
+Questo hook fornisce la gestione centralizzata degli errori. Modifiche non attente possono causare comportamenti imprevisti nella gestione degli errori in tutta l'applicazione.
+
+## Generazione Documenti
+
+**File**: `src/services/attestatiService.ts` e `src/services/googleDocsService.ts`
+
+Questi servizi gestiscono la generazione di documenti critici come attestati e certificati. Le modifiche devono essere testate accuratamente per evitare problemi di formato o errori nei documenti generati.
+
+## Schema del Database
+
+**File**: `backend/prisma/schema.prisma`
+
+Lo schema Prisma definisce la struttura del database. Qualsiasi modifica a questo file richiede attente considerazioni e può richiedere migrazioni del database.
+
+## Factory dei Servizi
+
+**File**: `src/services/serviceFactory.ts`
+
+```typescript
+// NON MODIFICARE: Pattern factory per i servizi API
+export const createService = <T, C extends object = any, U extends object = any>(basePath: string): ServiceMethods<T, C, U> => {
+  // Implementazione...
+};
+```
+
+**Perché è critico**: Questo factory è utilizzato da tutti i servizi API. Modifiche inappropriate possono causare errori in cascata su tutti i servizi.
+
+## Context Globali
+
+**File**: `src/context/AppStateContext.tsx`
+
+Questo context gestisce lo stato globale dell'applicazione. Modifiche non attente possono influenzare il comportamento di molti componenti che dipendono da questo stato.
+
+## Componenti di Layout Principali
+
+**File**: `src/components/Layout.tsx`, `src/components/Header.tsx`, `src/components/Sidebar.tsx`
+
+Questi componenti definiscono la struttura base dell'applicazione. Modifiche non attente possono influenzare l'intera interfaccia utente.
+
+## Validazione dei Form
+
+**File**: `src/hooks/useFormValidation.ts`
+
+Questo hook gestisce la validazione dei form in tutta l'applicazione. Modifiche inappropriate possono causare validazioni errate o comportamenti inaspettati nei form.
+
+## Routing dell'Applicazione
+
+**File**: (dipende dall'implementazione del router)
+
+I file che gestiscono il routing dell'applicazione sono critici perché determinano la navigazione dell'utente. Modifiche inappropriate possono rendere inaccessibili alcune parti dell'applicazione.
+
+## Servizi di Generazione Attestati
+
+**File**: `src/services/attestatiService.ts`
+
+```typescript
+// NON MODIFICARE: Logica di generazione attestati
+export async function generateAttestato(params: GenerateAttestatoParams): Promise<string> {
+  // Implementazione...
+}
+```
+
+**Perché è critico**: Questo servizio genera documenti ufficiali. Modifiche inappropriate possono causare problemi legali o di conformità.
+
+## Best Practices per le Sezioni Critiche
+
+1. **Commenta adeguatamente**: Aggiungi commenti che spiegano perché il codice è critico e come funziona.
+2. **Usa commenti di avvertimento**: Aggiungi commenti come `// IMPORTANTE:` o `// NON MODIFICARE:` per evidenziare parti particolarmente sensibili.
+3. **Test approfonditi**: Qualsiasi modifica a queste sezioni deve essere testata accuratamente.
+4. **Revisione del codice**: Richiedi sempre una revisione del codice quando modifichi sezioni critiche.
+5. **Documentazione**: Aggiorna la documentazione quando modifichi sezioni critiche.

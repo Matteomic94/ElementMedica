@@ -1,0 +1,261 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2023-06-08T12:30:00Z",
+  "components": {
+    "ui": {
+      "Button": {
+        "path": "src/components/ui/Button.tsx",
+        "props": ["variant", "size", "disabled", "onClick", "children", "className"],
+        "variants": ["primary", "secondary", "outline", "ghost", "link"],
+        "sizes": ["sm", "md", "lg"],
+        "description": "Componente Button di base con diverse varianti e dimensioni",
+        "usageExamples": [
+          "src/components/employees/EmployeeForm.tsx",
+          "src/components/courses/CourseActions.tsx"
+        ]
+      },
+      "Input": {
+        "path": "src/components/ui/Input.tsx",
+        "props": ["type", "placeholder", "disabled", "value", "onChange", "error", "label", "className"],
+        "types": ["text", "email", "password", "number", "date"],
+        "description": "Componente Input con supporto per label e messaggi di errore",
+        "usageExamples": [
+          "src/components/auth/LoginForm.tsx",
+          "src/components/employees/EmployeeForm.tsx"
+        ]
+      },
+      "Table": {
+        "path": "src/components/ui/Table.tsx",
+        "props": ["data", "columns", "loading", "onRowClick", "pagination", "className"],
+        "description": "Componente Table per visualizzare dati in formato tabellare con supporto per paginazione",
+        "usageExamples": [
+          "src/components/employees/EmployeeList.tsx",
+          "src/components/courses/CourseList.tsx"
+        ]
+      },
+      "Modal": {
+        "path": "src/components/ui/Modal.tsx",
+        "props": ["isOpen", "onClose", "title", "children", "size", "footerActions"],
+        "sizes": ["sm", "md", "lg", "xl", "full"],
+        "description": "Componente Modal per mostrare contenuti in overlay",
+        "usageExamples": [
+          "src/components/employees/EmployeeFormModal.tsx",
+          "src/components/courses/CourseDetailsModal.tsx"
+        ]
+      },
+      "Select": {
+        "path": "src/components/ui/Select.tsx",
+        "props": ["options", "value", "onChange", "placeholder", "disabled", "error", "label", "className"],
+        "description": "Componente Select per selezioni da menu a tendina",
+        "usageExamples": [
+          "src/components/employees/EmployeeForm.tsx",
+          "src/components/courses/CourseFilters.tsx"
+        ]
+      },
+      "Card": {
+        "path": "src/components/ui/Card.tsx",
+        "props": ["title", "children", "className", "footerActions"],
+        "description": "Contenitore Card con titolo opzionale e azioni nel footer",
+        "usageExamples": [
+          "src/components/dashboard/StatCard.tsx",
+          "src/components/trainers/TrainerProfileCard.tsx"
+        ]
+      },
+      "Badge": {
+        "path": "src/components/ui/Badge.tsx",
+        "props": ["variant", "text", "className"],
+        "variants": ["default", "success", "warning", "error", "info"],
+        "description": "Badge per visualizzare stati o tag",
+        "usageExamples": [
+          "src/components/courses/CourseStatus.tsx",
+          "src/components/employees/EmployeeStatus.tsx"
+        ]
+      }
+    },
+    "layouts": {
+      "AppLayout": {
+        "path": "src/components/layouts/AppLayout.tsx",
+        "props": ["children"],
+        "description": "Layout principale dell'applicazione con navbar e sidebar",
+        "usageExamples": [
+          "src/pages/dashboard/index.tsx",
+          "src/pages/employees/index.tsx"
+        ]
+      },
+      "AuthLayout": {
+        "path": "src/components/layouts/AuthLayout.tsx",
+        "props": ["children", "title"],
+        "description": "Layout per pagine di autenticazione",
+        "usageExamples": [
+          "src/pages/login.tsx",
+          "src/pages/register.tsx"
+        ]
+      }
+    },
+    "employees": {
+      "EmployeeList": {
+        "path": "src/components/employees/EmployeeList.tsx",
+        "props": ["employees", "loading", "onEmployeeSelect", "onDelete"],
+        "description": "Lista dipendenti con funzionalità di selezione e cancellazione",
+        "usageExamples": [
+          "src/pages/employees/index.tsx"
+        ]
+      },
+      "EmployeeForm": {
+        "path": "src/components/employees/EmployeeForm.tsx",
+        "props": ["employee", "onSubmit", "isLoading", "companies"],
+        "description": "Form per creazione e modifica dipendente",
+        "usageExamples": [
+          "src/pages/employees/[id]/edit.tsx",
+          "src/pages/employees/new.tsx"
+        ]
+      },
+      "EmployeeDetails": {
+        "path": "src/components/employees/EmployeeDetails.tsx",
+        "props": ["employeeId", "onEdit"],
+        "description": "Visualizzazione dettagli dipendente",
+        "usageExamples": [
+          "src/pages/employees/[id]/index.tsx"
+        ]
+      }
+    },
+    "courses": {
+      "CourseList": {
+        "path": "src/components/courses/CourseList.tsx",
+        "props": ["courses", "loading", "onCourseSelect", "onDelete"],
+        "description": "Lista corsi con funzionalità di selezione e cancellazione",
+        "usageExamples": [
+          "src/pages/courses/index.tsx"
+        ]
+      },
+      "CourseForm": {
+        "path": "src/components/courses/CourseForm.tsx",
+        "props": ["course", "onSubmit", "isLoading", "trainers"],
+        "description": "Form per creazione e modifica corso",
+        "usageExamples": [
+          "src/pages/courses/[id]/edit.tsx",
+          "src/pages/courses/new.tsx"
+        ]
+      },
+      "CourseSchedule": {
+        "path": "src/components/courses/CourseSchedule.tsx",
+        "props": ["courseId", "schedules", "onAddSession", "onDeleteSession"],
+        "description": "Gestione programmazione sessioni del corso",
+        "usageExamples": [
+          "src/pages/courses/[id]/schedule.tsx"
+        ]
+      }
+    },
+    "companies": {
+      "CompanyList": {
+        "path": "src/components/companies/CompanyList.tsx",
+        "props": ["companies", "loading", "onCompanySelect", "onDelete"],
+        "description": "Lista aziende con funzionalità di selezione e cancellazione",
+        "usageExamples": [
+          "src/pages/companies/index.tsx"
+        ]
+      },
+      "CompanyForm": {
+        "path": "src/components/companies/CompanyForm.tsx",
+        "props": ["company", "onSubmit", "isLoading"],
+        "description": "Form per creazione e modifica azienda",
+        "usageExamples": [
+          "src/pages/companies/[id]/edit.tsx",
+          "src/pages/companies/new.tsx"
+        ]
+      }
+    },
+    "trainers": {
+      "TrainerList": {
+        "path": "src/components/trainers/TrainerList.tsx",
+        "props": ["trainers", "loading", "onTrainerSelect", "onDelete"],
+        "description": "Lista trainer con funzionalità di selezione e cancellazione",
+        "usageExamples": [
+          "src/pages/trainers/index.tsx"
+        ]
+      },
+      "TrainerForm": {
+        "path": "src/components/trainers/TrainerForm.tsx",
+        "props": ["trainer", "onSubmit", "isLoading"],
+        "description": "Form per creazione e modifica trainer",
+        "usageExamples": [
+          "src/pages/trainers/[id]/edit.tsx",
+          "src/pages/trainers/new.tsx"
+        ]
+      },
+      "TrainerSpecialtiesSelector": {
+        "path": "src/components/trainers/TrainerSpecialtiesSelector.tsx",
+        "props": ["value", "onChange"],
+        "description": "Selettore multi-specialità per trainer",
+        "usageExamples": [
+          "src/components/trainers/TrainerForm.tsx"
+        ]
+      }
+    },
+    "schedules": {
+      "ScheduleList": {
+        "path": "src/components/schedules/ScheduleList.tsx",
+        "props": ["schedules", "loading", "onScheduleSelect", "onDelete"],
+        "description": "Lista programmazioni con funzionalità di selezione e cancellazione",
+        "usageExamples": [
+          "src/pages/schedules/index.tsx"
+        ]
+      },
+      "ScheduleForm": {
+        "path": "src/components/schedules/ScheduleForm.tsx",
+        "props": ["schedule", "onSubmit", "isLoading", "courses", "trainers", "companies"],
+        "description": "Form per creazione e modifica programmazione",
+        "usageExamples": [
+          "src/pages/schedules/[id]/edit.tsx",
+          "src/pages/schedules/new.tsx"
+        ]
+      },
+      "ScheduleSessionsList": {
+        "path": "src/components/schedules/ScheduleSessionsList.tsx",
+        "props": ["scheduleId", "sessions", "onAddSession", "onDeleteSession"],
+        "description": "Lista sessioni di una programmazione",
+        "usageExamples": [
+          "src/pages/schedules/[id]/sessions.tsx"
+        ]
+      },
+      "AttendanceSheet": {
+        "path": "src/components/schedules/AttendanceSheet.tsx",
+        "props": ["scheduleId", "sessionId", "employees"],
+        "description": "Foglio presenze per sessione",
+        "usageExamples": [
+          "src/pages/schedules/[id]/sessions/[sessionId]/attendance.tsx"
+        ]
+      }
+    },
+    "shared": {
+      "LoadingSpinner": {
+        "path": "src/components/shared/LoadingSpinner.tsx",
+        "props": ["size", "className"],
+        "sizes": ["sm", "md", "lg"],
+        "description": "Indicatore di caricamento",
+        "usageExamples": [
+          "src/components/employees/EmployeeList.tsx",
+          "src/components/courses/CourseList.tsx"
+        ]
+      },
+      "ErrorMessage": {
+        "path": "src/components/shared/ErrorMessage.tsx",
+        "props": ["error", "retry"],
+        "description": "Visualizzazione errori con possibilità di retry",
+        "usageExamples": [
+          "src/components/employees/EmployeeDetails.tsx",
+          "src/components/courses/CourseDetails.tsx"
+        ]
+      },
+      "ConfirmDialog": {
+        "path": "src/components/shared/ConfirmDialog.tsx",
+        "props": ["isOpen", "onClose", "onConfirm", "title", "message", "confirmLabel", "cancelLabel"],
+        "description": "Dialog di conferma per azioni critiche",
+        "usageExamples": [
+          "src/components/employees/EmployeeList.tsx",
+          "src/components/courses/CourseList.tsx"
+        ]
+      }
+    }
+  }
+} 

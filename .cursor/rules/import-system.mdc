@@ -1,0 +1,112 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Sistema di Importazione Generico
+
+## Principi Chiave
+- Utilizza SEMPRE `GenericImport` per funzionalità di importazione CSV
+- NON creare sistemi di importazione alternativi 
+- Ogni entità usa un campo univoco specifico per il controllo dei duplicati
+
+## Componenti
+
+| Nome | Scopo | Campo Univoco |
+|------|-------|---------------|
+| `GenericImport` | Componente base riutilizzabile | Configurabile |
+| `CompanyImport` | Importazione aziende | P.IVA (`piva`) |
+| `EmployeeImport` | Importazione dipendenti | Cod. Fiscale (`codiceFiscale`) |
+| `TrainerImport` | Importazione formatori | Cod. Fiscale (`codiceFiscale`) |
+| `CourseImport` | Importazione corsi | Codice (`code`) |
+
+## Utilizzo Base
+
+```tsx
+// Importare il componente
+import CompanyImport from '../components/companies/CompanyImport';
+
+// Nel componente
+const [isImportOpen, setIsImportOpen] = useState(false);
+
+// Nel render
+{isImportOpen && (
+  <CompanyImport
+    onClose={() => setIsImportOpen(false)}
+    onImport={async (data, overwriteIds) => {
+      try {
+        // Gestione importazione
+        showToast({ message: 'Importazione completata', type: 'success' });
+        setIsImportOpen(false);
+        refreshData();
+      } catch (error) {
+        showToast({ message: `Errore: ${error.message}`, type: 'error' });
+      }
+    }}
+    existingCompanies={companies} // Dati esistenti per controllo duplicati
+  />
+)}
+```
+
+## Creazione Nuovo Importatore
+
+1. **Definire file componente**:
+```tsx
+// src/components/newEntities/NewEntityImport.tsx
+import React from 'react';
+import GenericImport from '../shared/GenericImport';
+
+// Mappatura campi CSV
+const csvHeaderMap = {
+  'Campo CSV': 'campo_entita',
+  // ...altri campi
+};
+
+// Validazione
+const validateEntity = (entity) => {
+  const errors = [];
+  if (!entity.campo_richiesto) errors.push('Campo richiesto mancante');
+  return errors;
+};
+
+const NewEntityImport = ({ onImport, onClose, existingEntities = [] }) => {
+  return (
+    <GenericImport
+      entityType="nuove entità" // Nome plurale in italiano
+      uniqueField="campo_univoco" // Campo per controllo duplicati
+      csvHeaderMap={csvHeaderMap}
+      validateEntity={validateEntity}
+      onImport={onImport}
+      onClose={onClose}
+      existingEntities={existingEntities}
+    />
+  );
+};
+```
+
+## Parametri GenericImport
+
+| Parametro | Tipo | Descrizione |
+|-----------|------|------------|
+| `entityType` | string | Nome plurale dell'entità in italiano |
+| `uniqueField` | string | Campo per controllo duplicati |
+| `csvHeaderMap` | Record | Mappatura intestazioni CSV → campi entità |
+| `validateEntity` | Function | Validazione, restituisce array errori |
+| `onImport` | Function | Callback alla conferma importazione |
+| `onClose` | Function | Callback alla chiusura modale |
+| `existingEntities` | Array | Entità esistenti per controllo duplicati |
+
+## Processo di Importazione
+
+1. Selezione file CSV
+2. Anteprima dati e visualizzazione duplicati
+3. (Opzionale) Selezione duplicati da sovrascrivere
+4. Validazione dati
+5. Importazione e feedback con notifiche
+
+## Best Practices
+
+1. **Normalizza valori** per controllo duplicati (rimuovi spazi/case)
+2. **Valida accuratamente** tutti i campi obbligatori
+3. **Gestisci errori** con notifiche appropriate
+4. **Aggiorna la UI** dopo importazione completata

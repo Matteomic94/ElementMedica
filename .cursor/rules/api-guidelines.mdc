@@ -1,0 +1,189 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Linee Guida per le API
+
+Questo documento definisce le linee guida per l'interazione con le API nel progetto.
+
+## Architettura API
+
+Il progetto utilizza una configurazione a multi-server:
+
+- **API Server** (porta 4001): gestisce le operazioni CRUD principali
+- **Documents Server** (porta 4002): gestisce la generazione di documenti
+- **Proxy Server** (porta 4003): funge da punto di ingresso centralizzato
+
+Tutte le chiamate dal frontend dovrebbero essere indirizzate al Proxy Server (`http://localhost:4003`), che si occuperà di instradare le richieste al server appropriato.
+
+## File di Configurazione API
+
+Le configurazioni delle API sono centralizzate in `src/config/api/index.ts`:
+
+```typescript
+// Base URL per tutte le richieste API
+export const API_BASE_URL = 'http://localhost:4003'; // Proxy server
+
+// Prefissi specifici dei server
+export const API_ENDPOINTS = {
+  // Endpoint specifici
+  COMPANIES: '/companies',
+  EMPLOYEES: '/employees',
+  // ...altri endpoint
+  
+  // Endpoint che accettano ID
+  COMPANY_BY_ID: (id: string) => `/companies/${id}`,
+  EMPLOYEE_BY_ID: (id: string) => `/employees/${id}`,
+  // ...altri endpoint dinamici
+};
+```
+
+## Utilizzo dei Servizi API
+
+### Servizi Standardizzati
+
+I servizi API utilizzano un pattern factory definito in `services/serviceFactory.ts`:
+
+```typescript
+// Esempio di utilizzo del pattern factory
+import { createService } from './serviceFactory';
+import type { Employee, EmployeeCreate, EmployeeUpdate } from '../types';
+
+const baseService = createService<Employee, EmployeeCreate, EmployeeUpdate>('/employees');
+
+// Estensione con metodi personalizzati
+const employeeService = baseService.extend({
+  // Metodi specifici...
+});
+
+// Esportazione dei metodi
+export const getEmployees = employeeService.getAll;
+export const getEmployee = employeeService.getById;
+// ...altri metodi
+```
+
+### Metodi Standard per ogni Servizio
+
+Ogni servizio creato con la factory include questi metodi standard:
+
+| Metodo | Firma | Descrizione |
+|--------|-------|-------------|
+| `getAll` | `() => Promise<T[]>` | Recupera tutte le entità |
+| `getById` | `(id: string) => Promise<T>` | Recupera una singola entità |
+| `create` | `(data: C) => Promise<T>` | Crea una nuova entità |
+| `update` | `(id: string, data: U) => Promise<T>` | Aggiorna un'entità esistente |
+| `delete` | `(id: string) => Promise<void>` | Elimina un'entità |
+
+## Gestione degli Errori
+
+Le chiamate API utilizzano meccanismi standardizzati di gestione degli errori:
+
+```typescript
+// Le chiamate API dovrebbero essere sempre avvolte in blocchi try-catch
+try {
+  const data = await someApiCall();
+  // Elaborazione dei dati
+} catch (error) {
+  // Gestione dell'errore
+  console.error('API Error:', error);
+  showErrorToast(error.message || 'Si è verificato un errore');
+}
+```
+
+## Autenticazione
+
+Le richieste autenticate utilizzano un token JWT nell'header Authorization:
+
+```typescript
+// L'interceptor in services/api.ts gestisce automaticamente l'aggiunta del token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getToken();
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+```
+
+## Creazione di Nuovi Endpoint
+
+Quando è necessario aggiungere un nuovo endpoint:
+
+1. Aggiungerlo a `src/config/api/index.ts`
+2. Creare o estendere il servizio appropriato utilizzando il pattern factory
+3. Utilizzare i metodi standard dove possibile
+4. Aggiungere metodi personalizzati solo quando necessario
+
+Esempio di aggiunta di un nuovo endpoint:
+
+```typescript
+// In src/config/api/index.ts
+export const API_ENDPOINTS = {
+  // ...altri endpoint
+  REPORTS: '/reports',
+  REPORT_BY_ID: (id: string) => `/reports/${id}`,
+};
+
+// In src/services/reports.ts
+import { createService } from './serviceFactory';
+import type { Report, ReportCreate, ReportUpdate } from '../types';
+import { apiGet } from './api';
+
+const baseService = createService<Report, ReportCreate, ReportUpdate>('/reports');
+
+const reportService = baseService.extend({
+  generatePdf: async (reportId: string): Promise<string> => {
+    return apiGet<string>(`/reports/${reportId}/pdf`);
+  }
+});
+
+export const getReports = reportService.getAll;
+export const getReport = reportService.getById;
+export const createReport = reportService.create;
+export const updateReport = reportService.update;
+export const deleteReport = reportService.delete;
+export const generateReportPdf = reportService.generatePdf;
+
+export default reportService;
+```
+
+## Documentazione dei Tipi
+
+Ogni servizio API dovrebbe avere tipi TypeScript chiaramente definiti:
+
+```typescript
+// Esempio di definizione dei tipi per un servizio API
+export interface Report {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReportCreate {
+  title: string;
+  content: string;
+}
+
+export interface ReportUpdate {
+  title?: string;
+  content?: string;
+}
+```
+
+## Best Practices
+
+1. **Usa i servizi factory**: Non creare chiamate API ad hoc, usa sempre i servizi factory.
+2. **Centralizza gli endpoint**: Aggiungi sempre nuovi endpoint in `config/api/index.ts`.
+3. **Gestisci gli errori**: Avvolgi sempre le chiamate API in blocchi try-catch.
+4. **Usa tipi specifici**: Evita `any` nelle interfacce API.
+5. **Riutilizza i metodi standard**: Utilizza i metodi standard della factory quando possibile.
+6. **Documenta i metodi personalizzati**: Aggiungi commenti JSDoc ai metodi API personalizzati.

@@ -1,0 +1,26 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Multilingual Aspects
+
+The application mixes Italian and English terminology, particularly in database schema and UI components.
+
+## Italian Terms Used
+
+- **Aziende**: Companies
+- **Tariffa Oraria**: Hourly rate (for trainers)
+- **Codice Fiscale**: Italian tax code/fiscal code (for employees)
+- **Attestato/Attestati**: Certificate(s)
+
+## Document Generation
+
+- Documents are generated in Italian
+- Certificate numbering includes "anno progressivo" (progressive year numbering)
+
+## Development Guidelines
+
+- When working with these entities, maintain consistency with existing language choices
+- UI components display labels in Italian where appropriate
+- Validation rules consider Italian-specific formats (e.g., Codice Fiscale format)

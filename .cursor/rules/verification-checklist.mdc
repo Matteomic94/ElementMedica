@@ -1,0 +1,231 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Lista di Verifica per Modifiche al Codice
+
+Questo documento fornisce una checklist strutturata per verificare che le modifiche al codice siano conformi alle regole e alle convenzioni del progetto.
+
+## Istruzioni per l'Uso
+
+1. **Prima di iniziare** a lavorare su una modifica, leggi le sezioni pertinenti di questa checklist
+2. **Durante lo sviluppo**, consulta regolarmente questa lista per assicurarti di seguire le linee guida
+3. **Prima di finalizzare** le modifiche, verifica ogni punto della checklist applicabile
+4. **Prima di considerare completato il lavoro**, assicurati che tutti i punti siano soddisfatti
+
+## 🛑 Verifica Architettonica [FONDAMENTALE]
+
+- [ ] **Server Architecture**: Non ho creato nuovi server o modificato le porte esistenti
+  - API Server (porta 4001): gestione dati e business logic
+  - Documents Server (porta 4002): gestione documenti
+  - Proxy Server (porta 4003): routing e coordinamento
+- [ ] **Comunicazione Client-Server**: Tutte le comunicazioni frontend passano per il Proxy Server (porta 4003)
+- [ ] **Separazione delle Responsabilità**: Ho rispettato la separazione delle responsabilità tra i server
+- [ ] **Estensione dei Server**: Ho esteso i server esistenti anziché crearne di nuovi per nuove funzionalità
+
+## 📁 Verifica della Struttura [ALTA PRIORITÀ]
+
+- [ ] **Posizionamento dei File**: I nuovi file sono stati posizionati nelle directory appropriate:
+  - Componenti in `src/components/[area funzionale]/`
+  - Servizi in `src/services/`
+  - Hook in `src/hooks/`
+  - Tipi in `src/types/`
+- [ ] **Nomenclatura dei File**: I nomi dei file seguono le convenzioni stabilite:
+  - Componenti React: PascalCase e nome descrittivo (es. `UserProfileForm.tsx`)
+  - Utility: camelCase (es. `formatDate.ts`)
+  - Test: nome.test.ts(x) (es. `UserProfileForm.test.tsx`)
+- [ ] **Importazioni**: Le importazioni sono ordinate e raggruppate in modo coerente:
+  1. Librerie esterne (React, etc.)
+  2. Componenti/hook/utils interni
+  3. File di stile
+  4. Tipi
+- [ ] **Struttura dei Componenti**: I componenti rispettano la struttura standard:
+  1. Import statements
+  2. Definizione tipi/interfacce
+  3. Componente e logica
+  4. Export statement
+
+## 📋 Verifica del Codice [ALTA PRIORITÀ]
+
+- [ ] **Stile di Codifica**: Il codice segue lo stile del progetto
+  - Indentazione consistente
+  - Uso appropriato degli spazi
+  - Parentesi graffe in stile consistente
+- [ ] **Tipizzazione**: Tutte le interfacce e i tipi sono definiti correttamente
+  - Props dei componenti tipizzate con interfacce/tipi espliciti
+  - Funzioni con parametri e ritorni tipizzati
+  - Evitati `any` dove possibile
+- [ ] **JSDoc**: I componenti e le funzioni sono documentati con JSDoc
+  - Descrizione del componente/funzione
+  - Parametri documentati con `@param`
+  - Valore di ritorno documentato con `@returns`
+  - Esempio d'uso dove appropriato
+- [ ] **Nomi delle Variabili**: I nomi delle variabili sono descrittivi e seguono le convenzioni
+  - camelCase per variabili e funzioni
+  - PascalCase per tipi, interfacce e componenti React
+  - ALL_CAPS per costanti
+
+## 🔄 Verifica della Logica [ALTA PRIORITÀ]
+
+- [ ] **Gestione degli Errori**: Implementata gestione degli errori appropriata
+  - Uso dell'hook `useErrorHandler` per le operazioni asincrone
+  - Errori visualizzati all'utente in modo comprensibile
+  - Logging degli errori a fini di debug
+- [ ] **Pattern Factory**: Uso corretto del pattern factory per i servizi API
+  - Servizi creati utilizzando `createService` dalla factory
+  - Metodi personalizzati implementati tramite `.extend()`
+- [ ] **Stato React**: Gestione appropriata dello stato React
+  - Stato locale per componenti isolati
+  - Context per stato condiviso
+  - Hooks personalizzati per logica riutilizzabile
+- [ ] **UseEffect**: Dipendenze corrette negli useEffect
+  - Array di dipendenze completo e corretto
+  - Nessun side effect non gestito
+  - Cleanup function quando necessario
+
+## 🎨 Verifica dell'Interfaccia Utente [MEDIA PRIORITÀ]
+
+- [ ] **Coerenza Visiva**: L'interfaccia utente è coerente con il resto dell'applicazione
+  - Colori conformi alla palette del progetto
+  - Font e dimensioni del testo consistenti
+  - Spaziature e padding coerenti
+- [ ] **Componenti UI**: Utilizzo di componenti UI esistenti
+  - Non ho duplicato componenti UI esistenti
+  - Ho esteso componenti UI esistenti dove necessario
+- [ ] **Reattività**: L'interfaccia è reattiva e funziona su diverse dimensioni dello schermo
+  - Layout fluido o con breakpoint adeguati
+  - Elementi ridimensionati appropriatamente
+- [ ] **Accessibilità**: L'interfaccia rispetta le linee guida di accessibilità
+  - Testi alternativi per le immagini
+  - Contrasto sufficiente per il testo
+  - Elementi interattivi accessibili da tastiera
+
+## 🔍 Verifica delle Relazioni tra Entità [MEDIA PRIORITÀ]
+
+- [ ] **Integrità Referenziale**: Mantenuta l'integrità referenziale tra le entità
+  - Relazioni correttamente definite (one-to-many, many-to-many, etc.)
+  - Chiavi esterne gestite appropriatamente
+- [ ] **Cascade Deletes**: Gestite correttamente le eliminazioni a cascata
+  - Rispettate le regole di eliminazione a cascata definite nello schema
+  - Gestiti gli edge case di eliminazione
+- [ ] **Relazioni Many-to-Many**: Le relazioni many-to-many sono implementate correttamente
+  - Utilizzo corretto delle tabelle di giunzione
+  - Gestione appropriata dell'aggiunta e rimozione di relazioni
+
+## 🌐 Verifica Multilingue [MEDIA PRIORITÀ]
+
+- [ ] **Terminologia Italiana**: Utilizzo coerente della terminologia italiana dove richiesto
+  - `Azienda` invece di `Company` nei contesti appropriati
+  - `Attestato` invece di `Certificate` nei contesti appropriati
+  - `Tariffa Oraria` invece di `Hourly Rate` nei contesti appropriati
+- [ ] **Formato Date**: Le date sono formattate secondo lo standard italiano (DD/MM/YYYY)
+- [ ] **Validazione Codice Fiscale**: Validazione appropriata per i codici fiscali italiani
+
+## 🧪 Verifica dei Test [ALTA PRIORITÀ]
+
+- [ ] **Test Unitari**: Implementati test unitari per le nuove funzionalità
+  - Test per componenti React
+  - Test per hook personalizzati
+  - Test per funzioni utility
+- [ ] **Test di Integrazione**: Implementati test di integrazione dove applicabile
+  - Test per l'interazione tra componenti
+  - Test per l'interazione con i servizi
+- [ ] **Copertura dei Test**: I test coprono scenari significativi
+  - Percorsi di successo
+  - Gestione degli errori
+  - Edge case
+
+## 📚 Verifica della Documentazione [MEDIA PRIORITÀ]
+
+- [ ] **Documentazione Aggiornata**: La documentazione è stata aggiornata per riflettere le modifiche
+  - README.md
+  - JSDoc per nuove funzioni/componenti
+- [ ] **Commenti nel Codice**: Il codice complesso è commentato adeguatamente
+  - Spiegazioni per logica non ovvia
+  - Riferimenti a decisioni di design dove necessario
+- [ ] **Changelog**: Le modifiche sono state documentate in un changelog se applicabile
+
+## 🔒 Verifica della Sicurezza [ALTA PRIORITÀ]
+
+- [ ] **Validazione Input**: Tutti gli input utente sono validati
+  - Lato client per feedback immediato
+  - Lato server per sicurezza
+- [ ] **Sanitizzazione Dati**: I dati sono sanitizzati prima dell'utilizzo
+  - Evitati attacchi XSS
+  - Evitati attacchi di iniezione
+- [ ] **Gestione Autenticazione**: L'autenticazione è gestita correttamente
+  - Token gestiti in modo sicuro
+  - Scadenze gestite appropriatamente
+
+## 📊 Verifica delle Prestazioni [MEDIA PRIORITÀ]
+
+- [ ] **Rendering Efficiente**: Il rendering React è ottimizzato
+  - Utilizzo di `memo`, `useMemo` e `useCallback` dove appropriato
+  - Evitati rendering non necessari
+- [ ] **Caricamento Dati**: Il caricamento dei dati è efficiente
+  - Utilizzo di caching dove appropriato
+  - Paginazione implementata dove necessario
+- [ ] **Bundle Size**: Non sono state aggiunte dipendenze inutilmente pesanti
+  - Preferite soluzioni interne quando possibile
+  - Utilizzate versioni leggere di librerie quando disponibili
+
+## 🚫 Considerazioni per Modifiche a Codice Esistente [ALTA PRIORITÀ]
+
+- [ ] **Compatibilità Retroattiva**: Le modifiche sono retrocompatibili
+  - Non ho cambiato le firme delle funzioni esistenti
+  - Non ho modificato i comportamenti esistenti utilizzati altrove
+- [ ] **Effetti Collaterali**: Ho valutato gli effetti collaterali delle modifiche
+  - Identificati tutti i punti di utilizzo del codice modificato
+  - Verificato che le modifiche non rompano funzionalità esistenti
+- [ ] **Refactoring**: Il refactoring è stato minimale e mirato
+  - Limitato all'area di interesse
+  - Non ho fatto modifiche estetiche non correlate
+
+## 🔧 Lista di Verifica Pratica
+
+### Componente React
+- [ ] Interfaccia Props definita con JSDoc
+- [ ] Tutti gli stati inizializzati correttamente
+- [ ] Gestione corretta degli effetti collaterali
+- [ ] Gestione degli errori implementata
+- [ ] Componente testato
+- [ ] Design responsive
+- [ ] Accessibilità verificata
+
+### Servizio API
+- [ ] Utilizzo del pattern factory
+- [ ] Gestione errori appropriata
+- [ ] Tipi di risposta definiti
+- [ ] Metodi documentati con JSDoc
+- [ ] Testato con mock appropriati
+
+### Custom Hook
+- [ ] Interfaccia di ritorno definita
+- [ ] Gestione appropriata dello stato
+- [ ] Cleanup implementato se necessario
+- [ ] Documentato con JSDoc ed esempi
+- [ ] Testato isolatamente
+
+### Modifica al Database
+- [ ] Compatibilità con lo schema esistente
+- [ ] Migrazione testata in ambiente di sviluppo
+- [ ] Backup previsto prima dell'applicazione in produzione
+- [ ] Documentazione aggiornata
+
+## Esempio di Compilazione della Checklist
+
+### Componente Esempio: UserProfileForm
+
+- [x] **Server Architecture**: Non ho modificato l'architettura dei server
+- [x] **Posizionamento dei File**: Componente creato in `src/components/users/UserProfileForm.tsx`
+- [x] **Nomenclatura dei File**: Utilizzato PascalCase per il nome del componente
+- [x] **Tipizzazione**: Props tipizzate con interfaccia `UserProfileFormProps`
+- [x] **JSDoc**: Componente e props documentati con JSDoc
+- [x] **Gestione degli Errori**: Implementato useErrorHandler per la gestione delle chiamate API
+- [x] **Coerenza Visiva**: Utilizzati i componenti UI esistenti e stile coerente
+- [x] **Validazione Input**: Implementata validazione per tutti i campi del form
+- [ ] **Test Unitari**: Da implementare
+- [x] **Documentazione Aggiornata**: Aggiunto esempio d'uso nel JSDoc
+
+Note: Test unitari da implementare nella prossima iterazione

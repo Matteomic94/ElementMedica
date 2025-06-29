@@ -1,0 +1,604 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Foglio di Riferimento Rapido per l'Implementazione
+
+Questo documento fornisce comandi, snippet e pattern pronti all'uso per le operazioni più comuni durante l'implementazione di funzionalità nel progetto.
+
+## 🔍 Comandi di Esplorazione
+
+### Esplorazione File e Directory
+
+```bash
+# Esplora struttura directory
+ls -la src/components/[area]
+
+# Trova tutti i file .tsx in una directory
+find src/components/[area] -name "*.tsx"
+
+# Trova tutti i hook personalizzati
+find src/hooks -name "use*.ts" -o -name "use*.tsx"
+
+# Cerca file per nome (fuzzy search)
+find src -type f -name "*Employee*"
+```
+
+### Ricerca nel Codice
+
+```bash
+# Trova componenti React esportati
+grep -r "export.*\(function\|const\).*=.*(" src/components/[area]
+
+# Trova utilizzi di un componente
+grep -r "import.*Button" src/
+
+# Trova servizi API
+grep -r "createService" src/services
+
+# Cerca utilizzi di un hook
+grep -r "use[A-Z][a-zA-Z]*(" src/
+```
+
+## ⚛️ Snippets React
+
+### Componente Funzionale Base
+
+```tsx
+import React from 'react';
+
+interface ComponentNameProps {
+  // Definire le props qui
+}
+
+export function ComponentName({ /* props destructured */ }: ComponentNameProps) {
+  // Hooks
+  // Handlers
+  
+  return (
+    <div>
+      {/* JSX content */}
+    </div>
+  );
+}
+```
+
+### Componente con Gestione Stato
+
+```tsx
+import React, { useState } from 'react';
+
+interface ComponentNameProps {
+  // Definire le props qui
+}
+
+export function ComponentName({ /* props */ }: ComponentNameProps) {
+  const [state, setState] = useState(initialValue);
+  
+  const handleClick = () => {
+    setState(newValue);
+  };
+  
+  return (
+    <div>
+      <p>{state}</p>
+      <button onClick={handleClick}>Update</button>
+    </div>
+  );
+}
+```
+
+### Container Component
+
+```tsx
+import React from 'react';
+import { useYourEntityHook } from 'src/hooks/api/useYourEntity';
+import { YourEntityComponent } from './YourEntityComponent';
+
+export function YourEntityContainer() {
+  const { data, loading, error, refetch } = useYourEntityHook();
+  
+  if (loading) return <LoadingSpinner />;
+  if (error) return <ErrorMessage error={error} retry={refetch} />;
+  
+  return <YourEntityComponent data={data} />;
+}
+```
+
+### Form Component
+
+```tsx
+import React from 'react';
+import { useForm } from 'src/hooks/useForm';
+import { Button, Input, Select } from 'src/components/ui';
+
+interface FormData {
+  // Define form fields
+}
+
+interface FormComponentProps {
+  initialValues?: FormData;
+  onSubmit: (data: FormData) => void;
+}
+
+export function FormComponent({ initialValues, onSubmit }: FormComponentProps) {
+  const { values, errors, touched, handleChange, handleBlur, handleSubmit } = 
+    useForm<FormData>({
+      initialValues: initialValues || { /* default values */ },
+      onSubmit,
+      validationSchema: /* validation schema */
+    });
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      <Input
+        name="fieldName"
+        value={values.fieldName}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        error={touched.fieldName ? errors.fieldName : undefined}
+      />
+      {/* More fields */}
+      <Button type="submit">Submit</Button>
+    </form>
+  );
+}
+```
+
+## 🔄 Hook Personalizzati
+
+### Custom Data Fetching Hook
+
+```tsx
+import { useState, useEffect } from 'react';
+import { entityService } from 'src/services/entityService';
+import { useErrorHandler } from 'src/hooks/useErrorHandler';
+
+export function useEntity(id?: string) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { error, handleError, clearError } = useErrorHandler();
+  
+  const fetchData = async () => {
+    if (!id) return;
+    setLoading(true);
+    clearError();
+    try {
+      const result = await entityService.getEntityById(id);
+      setData(result);
+    } catch (err) {
+      handleError(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+  
+  return { data, loading, error, refetch: fetchData };
+}
+```
+
+### Custom UI State Hook
+
+```tsx
+import { useState, useCallback } from 'react';
+
+export function useToggle(initialState = false) {
+  const [state, setState] = useState(initialState);
+  
+  const toggle = useCallback(() => setState(prev => !prev), []);
+  const setTrue = useCallback(() => setState(true), []);
+  const setFalse = useCallback(() => setState(false), []);
+  
+  return [state, toggle, setTrue, setFalse] as const;
+}
+```
+
+## 🔌 Servizi API
+
+### Definizione Service
+
+```tsx
+import { createService } from 'src/services/serviceFactory';
+
+const BASE_URL = '/api/entities';
+
+export const entityService = createService({
+  getAll: () => ({
+    url: BASE_URL,
+    method: 'GET'
+  }),
+  getById: (id: string) => ({
+    url: `${BASE_URL}/${id}`,
+    method: 'GET'
+  }),
+  create: (data: EntityData) => ({
+    url: BASE_URL,
+    method: 'POST',
+    data
+  }),
+  update: (id: string, data: EntityData) => ({
+    url: `${BASE_URL}/${id}`,
+    method: 'PUT',
+    data
+  }),
+  delete: (id: string) => ({
+    url: `${BASE_URL}/${id}`,
+    method: 'DELETE'
+  })
+});
+```
+
+### Chiamata Service
+
+```tsx
+import { entityService } from 'src/services/entityService';
+import { useErrorHandler } from 'src/hooks/useErrorHandler';
+
+// In un componente o hook
+const { handleError } = useErrorHandler();
+
+try {
+  const result = await entityService.getAll();
+  // Usa result
+} catch (err) {
+  handleError(err);
+}
+```
+
+## 🧩 Pattern Comuni
+
+### Context Provider
+
+```tsx
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+
+interface ContextState {
+  // State definition
+}
+
+interface ContextValue extends ContextState {
+  // Actions
+}
+
+const initialState: ContextState = {
+  // Initial values
+};
+
+const YourContext = createContext<ContextValue | undefined>(undefined);
+
+export function YourContextProvider({ children }: { children: ReactNode }) {
+  const [state, setState] = useState<ContextState>(initialState);
+  
+  // Define actions that modify state
+  const someAction = () => {
+    setState(/* new state */);
+  };
+  
+  const value: ContextValue = {
+    ...state,
+    someAction
+  };
+  
+  return (
+    <YourContext.Provider value={value}>
+      {children}
+    </YourContext.Provider>
+  );
+}
+
+export function useYourContext() {
+  const context = useContext(YourContext);
+  if (context === undefined) {
+    throw new Error('useYourContext must be used within a YourContextProvider');
+  }
+  return context;
+}
+```
+
+### Reducer Pattern
+
+```tsx
+import { useReducer } from 'react';
+
+interface State {
+  // State definition
+}
+
+type Action = 
+  | { type: 'ACTION_ONE'; payload: any }
+  | { type: 'ACTION_TWO'; payload: any };
+
+const initialState: State = {
+  // Initial values
+};
+
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'ACTION_ONE':
+      return { ...state, /* changes */ };
+    case 'ACTION_TWO':
+      return { ...state, /* changes */ };
+    default:
+      return state;
+  }
+}
+
+export function useYourReducer() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  
+  const actionOne = (payload) => {
+    dispatch({ type: 'ACTION_ONE', payload });
+  };
+  
+  const actionTwo = (payload) => {
+    dispatch({ type: 'ACTION_TWO', payload });
+  };
+  
+  return { state, actionOne, actionTwo };
+}
+```
+
+## 📋 Liste e Tabelle
+
+### Lista Base
+
+```tsx
+import React from 'react';
+
+interface ListProps<T> {
+  items: T[];
+  renderItem: (item: T) => React.ReactNode;
+  keyExtractor: (item: T) => string;
+}
+
+export function List<T>({ 
+  items, 
+  renderItem, 
+  keyExtractor 
+}: ListProps<T>) {
+  if (!items.length) {
+    return <div>No items found</div>;
+  }
+  
+  return (
+    <ul>
+      {items.map(item => (
+        <li key={keyExtractor(item)}>
+          {renderItem(item)}
+        </li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### Tabella con Sorting
+
+```tsx
+import React, { useState } from 'react';
+
+interface Column<T> {
+  key: string;
+  header: string;
+  render?: (item: T) => React.ReactNode;
+}
+
+interface TableProps<T> {
+  data: T[];
+  columns: Column<T>[];
+  keyExtractor: (item: T) => string;
+}
+
+export function Table<T>({ 
+  data, 
+  columns, 
+  keyExtractor 
+}: TableProps<T>) {
+  const [sortKey, setSortKey] = useState('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDirection('asc');
+    }
+  };
+  
+  const sortedData = [...data].sort((a, b) => {
+    if (!sortKey) return 0;
+    
+    const valueA = a[sortKey];
+    const valueB = b[sortKey];
+    
+    if (valueA < valueB) return sortDirection === 'asc' ? -1 : 1;
+    if (valueA > valueB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+  
+  return (
+    <table>
+      <thead>
+        <tr>
+          {columns.map(column => (
+            <th 
+              key={column.key} 
+              onClick={() => handleSort(column.key)}
+            >
+              {column.header}
+              {sortKey === column.key && (
+                <span>{sortDirection === 'asc' ? '↑' : '↓'}</span>
+              )}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {sortedData.map(item => (
+          <tr key={keyExtractor(item)}>
+            {columns.map(column => (
+              <td key={column.key}>
+                {column.render 
+                  ? column.render(item) 
+                  : item[column.key]
+                }
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+```
+
+## 🛠 Utility
+
+### Funzione di Validazione
+
+```tsx
+export function validateField(
+  value: any, 
+  rules: { 
+    required?: boolean;
+    minLength?: number;
+    maxLength?: number;
+    pattern?: RegExp;
+    custom?: (value: any) => boolean | string;
+  }
+): string | null {
+  if (rules.required && (!value || value === '')) {
+    return 'This field is required';
+  }
+  
+  if (rules.minLength && value.length < rules.minLength) {
+    return `Minimum length is ${rules.minLength} characters`;
+  }
+  
+  if (rules.maxLength && value.length > rules.maxLength) {
+    return `Maximum length is ${rules.maxLength} characters`;
+  }
+  
+  if (rules.pattern && !rules.pattern.test(value)) {
+    return 'Invalid format';
+  }
+  
+  if (rules.custom) {
+    const customResult = rules.custom(value);
+    if (typeof customResult === 'string') {
+      return customResult;
+    }
+    if (customResult === false) {
+      return 'Invalid value';
+    }
+  }
+  
+  return null;
+}
+```
+
+### Format Date
+
+```tsx
+export function formatDate(date: Date | string, format: string = 'dd/MM/yyyy'): string {
+  const d = new Date(date);
+  
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  
+  return format
+    .replace('dd', day)
+    .replace('MM', month)
+    .replace('yyyy', year.toString())
+    .replace('HH', hours)
+    .replace('mm', minutes);
+}
+```
+
+## 🔒 Gestione Errori
+
+### tryWithErrorHandler
+
+```tsx
+import { useErrorHandler } from 'src/hooks/useErrorHandler';
+
+// Wrapper per funzioni async
+export function useAsyncHandler() {
+  const { handleError } = useErrorHandler();
+  
+  async function tryWithErrorHandler<T>(
+    fn: () => Promise<T>,
+    onSuccess?: (result: T) => void
+  ): Promise<T | undefined> {
+    try {
+      const result = await fn();
+      onSuccess?.(result);
+      return result;
+    } catch (error) {
+      handleError(error);
+      return undefined;
+    }
+  }
+  
+  return { tryWithErrorHandler };
+}
+
+// Uso
+const { tryWithErrorHandler } = useAsyncHandler();
+
+const handleSubmit = () => {
+  tryWithErrorHandler(
+    () => entityService.create(formData),
+    (result) => {
+      // Handle success
+    }
+  );
+};
+```
+
+## 📦 Moduli di Terze Parti
+
+### Integrazione con Library XYZ
+
+```tsx
+// Placeholder per integrazioni specifiche con librerie di terze parti
+// come react-query, formik, react-table, etc.
+```
+
+## 📱 Responsive Design
+
+### Media Query Hook
+
+```tsx
+import { useEffect, useState } from 'react';
+
+export function useMediaQuery(query: string): boolean {
+  const [matches, setMatches] = useState(false);
+  
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(query);
+    setMatches(mediaQuery.matches);
+    
+    const handler = (event: MediaQueryListEvent) => {
+      setMatches(event.matches);
+    };
+    
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [query]);
+  
+  return matches;
+}
+
+// Uso
+const isMobile = useMediaQuery('(max-width: 768px)');
+```

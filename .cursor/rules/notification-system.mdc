@@ -1,0 +1,65 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Sistema di Notifiche
+
+## Principi Chiave
+- Utilizza SEMPRE `useToast` per feedback all'utente
+- NON creare meccanismi di notifica alternativi
+- Le notifiche mostrano feedback temporaneo nell'angolo superiore destro
+
+## Componenti
+
+| Nome | Scopo | Posizione |
+|------|-------|-----------|
+| `ToastProvider` | Gestisce lo stato delle notifiche | `src/context/ToastContext.tsx` |
+| `useToast` | Hook per mostrare notifiche | `src/hooks/useToast.ts` |
+| `Notifications` | Componente UI per mostrare notifiche | `src/components/shared/Notifications.tsx` |
+
+## Utilizzo Base
+
+```tsx
+import { useToast } from '../hooks/useToast';
+
+// Nel componente
+const { showToast } = useToast();
+
+// Mostrare notifiche
+showToast({ message: 'Operazione completata', type: 'success' });
+showToast({ message: 'Si è verificato un errore', type: 'error' });
+showToast({ message: 'Attenzione!', type: 'warning' });
+showToast({ message: 'Informazione', type: 'info' });
+
+// Con durata personalizzata (ms)
+showToast({ message: 'Avviso', type: 'warning', duration: 5000 });
+```
+
+## Tipi di Notifiche
+
+| Tipo | Colore | Utilizzo |
+|------|--------|----------|
+| `success` | Verde | Operazioni completate con successo |
+| `error` | Rosso | Errori ed eccezioni |
+| `warning` | Giallo | Avvisi e attenzioni |
+| `info` | Blu | Informazioni generali |
+
+## Best Practices
+
+1. **QUANDO USARE**: Operazioni CRUD, upload/download, azioni con effetti di sistema
+2. **QUANDO NON USARE**: Errori critici (usa modal), informazioni persistenti (usa banner)
+3. **MESSAGGI**: Brevi, informativi, specifici 
+4. **ERRORI API**: Mostra sempre nelle catch di chiamate API
+
+## Esempio per Operazioni CRUD
+
+```tsx
+try {
+  await createEntity(data);
+  showToast({ message: 'Elemento creato con successo', type: 'success' });
+  // Altre azioni...
+} catch (error) {
+  showToast({ message: `Errore: ${error.message}`, type: 'error' });
+}
+```

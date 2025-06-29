@@ -1,0 +1,280 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# AI Discovery Agent
+
+Questo documento definisce il protocollo per l'aggiornamento autonomo della conoscenza della base di codice da parte degli assistenti AI. L'AI Discovery Agent è un approccio strutturato per l'esplorazione, l'analisi e la documentazione di componenti e pattern nel codice.
+
+## Obiettivo
+
+L'AI Discovery Agent ha lo scopo di:
+
+1. **Scoprire** automaticamente componenti, hook, servizi e pattern nel codice
+2. **Catalogare** questi elementi nei file di registro nella directory `.cursor/ai-state/`
+3. **Mantenere** una conoscenza aggiornata dell'architettura dell'applicazione
+4. **Migliorare** l'efficacia delle risposte e delle soluzioni proposte
+
+## Processo di Scoperta
+
+### 1️⃣ Attivazione della Scoperta
+
+Il processo di scoperta dovrebbe essere attivato in uno dei seguenti casi:
+
+- **Prima analisi**: Quando si lavora su questo progetto per la prima volta
+- **Area inesplorata**: Quando si incontra una parte del codice non documentata nei registri
+- **Implementazione**: Prima di implementare una soluzione in un'area specifica
+- **Verifica**: Quando si verifica incertezza sulla struttura o i pattern
+
+### 2️⃣ Esplorazione Strutturale
+
+```
+1. Esaminare la struttura delle directory rilevanti
+2. Identificare file e componenti chiave
+3. Mappare le relazioni tra file e componenti
+4. Documentare la struttura scoperta
+```
+
+#### Comandi di Esplorazione
+
+```bash
+# Esplora la struttura delle directory
+ls -la src/components/[area]
+
+# Cerca componenti React
+grep -r "export.*function.*(" src/components/[area]
+grep -r "export.*const.*=" src/components/[area]
+
+# Cerca hook personalizzati
+find src/hooks -name "use*.ts" -o -name "use*.tsx"
+
+# Cerca servizi API
+grep -r "createService" src/services
+```
+
+### 3️⃣ Analisi dei Componenti
+
+Per ciascun componente identificato:
+
+1. **Estrai metadati**:
+   - Nome e percorso del file
+   - Props (parametri) accettate
+   - Tipi e interfacce
+   - Varianti o configurazioni
+
+2. **Identifica relazioni**:
+   - Dipendenze (import)
+   - Utilizzo di altri componenti
+   - Hook utilizzati
+   - Servizi chiamati
+
+3. **Riconosci pattern**:
+   - Pattern di composizione
+   - Pattern di gestione stato
+   - Pattern di gestione errori
+   - Pattern di rendering condizionale
+
+#### Tecniche di Analisi
+
+```typescript
+// Esempio di analisi di un componente
+function analyzeComponent(filePath) {
+  // 1. Leggi il contenuto del file
+  const content = readFile(filePath);
+  
+  // 2. Estrai interfacce e tipi
+  const types = extractTypes(content);
+  
+  // 3. Identifica props
+  const props = extractProps(content, types);
+  
+  // 4. Identifica hook utilizzati
+  const hooks = extractHookUsages(content);
+  
+  // 5. Identifica componenti utilizzati
+  const components = extractComponentUsages(content);
+  
+  // 6. Identifica pattern
+  const patterns = identifyPatterns(content, hooks, components);
+  
+  // 7. Registra i risultati
+  registerComponent({
+    path: filePath,
+    props,
+    types,
+    hooks,
+    components,
+    patterns
+  });
+}
+```
+
+### 4️⃣ Analisi dei Pattern
+
+1. **Riconosci pattern comuni**:
+   - Container/Presentational
+   - Render props
+   - HOCs
+   - Custom hooks
+   - Context API usage
+
+2. **Identifica best practice**:
+   - Memoizzazione (useMemo, useCallback)
+   - Error boundaries
+   - Lazy loading
+   - Code splitting
+
+3. **Documenta anti-pattern**:
+   - Prop drilling eccessivo
+   - Componenti troppo complessi
+   - Duplicazione logica
+   - Re-render non necessari
+
+## Registrazione delle Scoperte
+
+### Schema di Registrazione
+
+Ogni tipo di elemento dovrebbe essere registrato nel file appropriato:
+
+- `component-registry.json` - Componenti React
+- `hooks-registry.json` - Hook personalizzati
+- `services-registry.json` - Servizi API
+- `patterns-discovered.json` - Pattern implementativi
+
+### Processo di Aggiornamento
+
+1. **Leggi** il file di registro esistente
+2. **Confronta** con le nuove scoperte
+3. **Aggiorna** le voci esistenti o aggiungi nuove voci
+4. **Salva** il file aggiornato
+
+```javascript
+// Pseudo-codice per l'aggiornamento del registro
+function updateRegistry(registryPath, newDiscoveries) {
+  // 1. Leggi il registro esistente
+  const registry = readJsonFile(registryPath);
+  
+  // 2. Per ogni nuova scoperta
+  for (const discovery of newDiscoveries) {
+    // 3. Verifica se già esiste
+    const existingEntry = findEntry(registry, discovery.id);
+    
+    if (existingEntry) {
+      // 4a. Aggiorna voce esistente
+      mergeData(existingEntry, discovery);
+    } else {
+      // 4b. Aggiungi nuova voce
+      registry.items.push(discovery);
+    }
+  }
+  
+  // 5. Aggiorna timestamp
+  registry.lastUpdated = new Date().toISOString();
+  
+  // 6. Salva il registro aggiornato
+  writeJsonFile(registryPath, registry);
+}
+```
+
+## Applicazione Durante lo Sviluppo
+
+### Pre-Implementazione
+
+Prima di implementare una soluzione:
+
+1. **Attiva** il processo di scoperta per l'area rilevante
+2. **Consulta** i registri per componenti e pattern esistenti
+3. **Integra** le scoperte nel piano di implementazione
+
+### Post-Implementazione
+
+Dopo l'implementazione:
+
+1. **Aggiorna** i registri con eventuali nuovi componenti o pattern
+2. **Verifica** che l'implementazione segua i pattern esistenti
+3. **Documenta** nuovi pattern introdotti
+
+## Esempio di Workflow di Scoperta
+
+### Scenario: Nuovo Form per Entità "Certificate"
+
+```mermaid
+graph TD
+    A[Identificare Area] --> B[Cercare Entità Simili]
+    B --> C{Trovato Simile?}
+    C -->|Sì| D[Analizzare Pattern Esistente]
+    C -->|No| E[Cercare Pattern Generici]
+    D --> F[Documentare nel Registry]
+    E --> F
+    F --> G[Applicare Pattern alla Nuova Entità]
+```
+
+#### Passi Concreti
+
+1. **Identificare Area**: "Certificates" riguarda la gestione documentale
+2. **Cercare Entità Simili**: I componenti "Employee" e "Course" hanno form simili
+3. **Analizzare Pattern**: EmployeeForm usa pattern container/presentational + custom hooks per validazione
+4. **Documentare**: Aggiungere pattern "form" al registry con esempi da EmployeeForm
+5. **Applicare**: Implementare CertificateForm seguendo lo stesso pattern
+
+## Ciclo di Vita della Conoscenza
+
+```
+┌─────────────────────┐
+│                     │
+│  SCOPERTA INIZIALE  │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  CATALOGAZIONE      │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  APPLICAZIONE       │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  VERIFICA           │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  AGGIORNAMENTO      │
+│                     │
+└─────────────────────┘
+```
+
+## Attivazione Automatica
+
+L'assistente AI dovrebbe automaticamente attivare il Discovery Agent quando:
+
+1. Riceve una richiesta di implementare una nuova funzionalità
+2. Deve modificare un'area del codice non familiare
+3. Nota divergenze tra il codice attuale e i registri esistenti
+4. Si chiede di analizzare o migliorare l'architettura dell'applicazione
+
+## Limiti e Considerazioni
+
+- **Performance**: Il processo di scoperta può richiedere tempo; considerare di eseguirlo in background
+- **Validazione Umana**: Le scoperte critiche dovrebbero essere validate dagli sviluppatori
+- **Incertezza**: In caso di pattern ambigui, contrassegnare con un livello di confidenza
+- **Priorità**: Dare priorità all'identificazione di componenti riutilizzabili e pattern critici
+
+## Conclusione
+
+L'AI Discovery Agent fornisce un framework strutturato per l'auto-miglioramento continuo degli assistenti AI che lavorano su questo progetto. Seguendo questo protocollo, l'assistente può:
+
+1. Costruire una comprensione sempre più profonda della base di codice
+2. Proporre soluzioni più allineate con l'architettura esistente
+3. Identificare opportunità di rifattorizzazione o miglioramento
+4. Assistere efficacemente gli sviluppatori con consigli contestualmente rilevanti
+
+Il discovery continuo è parte fondamentale del processo di sviluppo assistito dall'IA e dovrebbe essere integrato nel workflow quotidiano.

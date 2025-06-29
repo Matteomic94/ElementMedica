@@ -1,0 +1,30 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Database Schema
+
+The application uses Prisma ORM with the following main entities:
+
+## Main Entities
+
+- **Employees**: Staff members with department assignment and identification details (codice fiscale)
+- **Trainers**: Training professionals with specialties and hourly rates (tariffa oraria)
+- **Companies**: Business entities (referred to as "Aziende" in Italian)
+- **Courses**: Training courses with related metadata
+- **Schedules**: Training schedules with:
+  - Delivery modes
+  - Session tracking
+  - Company relationships
+  - Attendance records
+- **Documents**:
+  - Attestati (Certificates)
+  - Templates with linking relationships
+  
+## Key Relationships
+
+- Schedules can be associated with multiple companies
+- Courses have schedules
+- Employees belong to companies and departments
+- Templates are linked to various document types

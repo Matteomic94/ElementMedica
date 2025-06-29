@@ -1,0 +1,69 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Mappa del Progetto
+
+## Struttura File
+
+La struttura principale del progetto è organizzata come segue:
+
+```
+src/
+├── api/                   # API condivise tra componenti
+├── app/                   # Componenti App Router (Next.js)
+├── components/            # Componenti React organizzati per funzionalità
+├── config/                # Configurazione centralizzata dell'applicazione
+├── constants/             # Costanti dell'applicazione
+├── context/               # Context React per lo stato globale
+├── data/                  # Dati statici e di esempio
+├── hooks/                 # Hook React personalizzati
+├── lib/                   # Utility e funzioni di supporto
+├── pages/                 # Pagine dell'applicazione
+├── services/              # Servizi di comunicazione con le API
+├── shared/                # Codice condiviso con il backend
+├── styles/                # Stili CSS e configurazione Tailwind
+└── types/                 # Definizioni TypeScript
+```
+
+Backend:
+```
+backend/
+├── generated/            # Codice generato (es. client Prisma)
+├── prisma/               # Schema DB e migrazioni
+├── routes/               # Endpoint API
+└── uploads/              # File caricati (documenti e template)
+```
+
+## Componenti chiave
+
+- [src/components/Layout.tsx](mdc:src/components/Layout.tsx) - Layout principale dell'applicazione
+- [src/components/Sidebar.tsx](mdc:src/components/Sidebar.tsx) - Menu di navigazione
+- [src/components/Header.tsx](mdc:src/components/Header.tsx) - Header dell'applicazione
+
+## Servizi API
+
+- [src/services/api.ts](mdc:src/services/api.ts) - Funzioni base per le chiamate HTTP
+- [src/services/serviceFactory.ts](mdc:src/services/serviceFactory.ts) - Factory per la creazione dei servizi
+- [src/config/api/index.ts](mdc:src/config/api/index.ts) - Configurazione degli endpoint API
+
+## Relazioni tra Entità
+
+- Companies → Employees (one-to-many)
+- Courses → Schedules (one-to-many)
+- Trainers → Schedules (one-to-many)
+- Schedules → Employees (many-to-many)
+- Schedules → Attestati (one-to-many)
+
+## File di Configurazione
+
+- [src/config/index.ts](mdc:src/config/index.ts) - Configurazione centralizzata
+- [src/constants/index.ts](mdc:src/constants/index.ts) - Costanti dell'applicazione
+
+## Pattern di Sviluppo
+
+1. Servizi: Utilizzare il pattern factory in `serviceFactory.ts`
+2. Componenti: Organizzati per funzionalità in `components/`
+3. Hook: Personalizzati in `hooks/` per la gestione dello stato
+4. Context: Stato globale in `context/`

@@ -1,0 +1,163 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Glossario dei Termini
+
+Questo glossario fornisce definizioni precise per i termini specifici del dominio utilizzati in tutto il progetto, con particolare attenzione ai termini in italiano.
+
+## A
+
+### Azienda (Company)
+**Italiano**: Azienda  
+**Inglese**: Company  
+**Definizione**: Entità aziendale cliente che partecipa alla formazione. Corrisponde alla tabella `companies` nel database.  
+**Utilizzo**: In alcune parti del codice e del database potrebbe essere indicata come "Company" o "companies".  
+**Esempio**: `getAziende()`, `companyId`
+
+### Attestato (Certificate)
+**Italiano**: Attestato  
+**Inglese**: Certificate  
+**Definizione**: Documento ufficiale che certifica il completamento di un corso di formazione.  
+**Tabella DB**: `attestati`  
+**Campi rilevanti**:
+- `annoProgressivo` - Anno e numero progressivo del certificato
+- `fileUrl` - URL al file del certificato generato
+- `issued` - Flag che indica se il certificato è stato emesso
+**Esempio**: `generateAttestato()`, `attestatoId`
+
+## C
+
+### Codice Fiscale
+**Italiano**: Codice Fiscale  
+**Inglese**: (Non ha un equivalente esatto, simile a "Tax ID" o "Fiscal Code")  
+**Definizione**: Codice alfanumerico di 16 caratteri che identifica univocamente una persona fisica in Italia. È obbligatorio per i dipendenti nel sistema.  
+**Formato**: Composto da: 3 lettere (cognome) + 3 lettere (nome) + 2 cifre (anno) + 1 lettera (mese) + 2 cifre (giorno+sesso) + 4 caratteri (luogo) + 1 lettera (controllo)  
+**Validazione**: Deve seguire un pattern specifico verificabile con una regex.  
+**Esempio**: `RSSMRA80A01H501Z` (per Mario Rossi)
+
+### Corso (Course)
+**Italiano**: Corso  
+**Inglese**: Course  
+**Definizione**: Programma di formazione che può essere pianificato più volte.  
+**Tabella DB**: `courses`  
+**Campi rilevanti**:
+- `title` - Titolo del corso
+- `description` - Descrizione del corso
+- `duration` - Durata in ore
+**Esempio**: `getCourses()`, `courseId`
+
+## D
+
+### Dipartimento (Department)
+**Italiano**: Dipartimento  
+**Inglese**: Department  
+**Definizione**: Divisione all'interno di un'azienda a cui appartengono i dipendenti.  
+**Tabella DB**: `departments`  
+**Relazioni**:
+- Un dipendente appartiene a un solo dipartimento
+- Un dipartimento appartiene a una sola azienda
+**Esempio**: `departmentId`, `getDepartments()`
+
+### Dipendente (Employee)
+**Italiano**: Dipendente  
+**Inglese**: Employee  
+**Definizione**: Individuo che lavora per un'azienda e può partecipare a sessioni di formazione.  
+**Tabella DB**: `employees`  
+**Campi rilevanti**:
+- `firstName` - Nome
+- `lastName` - Cognome
+- `codiceFiscale` - Codice fiscale (obbligatorio)
+- `companyId` - Riferimento all'azienda di appartenenza
+**Esempio**: `getEmployees()`, `employeeId`
+
+## F
+
+### Formatore (Trainer)
+**Italiano**: Formatore  
+**Inglese**: Trainer  
+**Definizione**: Professionista che conduce i corsi di formazione.  
+**Tabella DB**: `trainers`  
+**Campi rilevanti**:
+- `specialties` - Specializzazioni del formatore
+- `tariffaOraria` - Tariffa oraria
+**Esempio**: `getTrainers()`, `trainerId`
+
+## L
+
+### Lettera di Incarico
+**Italiano**: Lettera di Incarico  
+**Inglese**: Appointment Letter  
+**Definizione**: Documento formale che assegna un incarico di formazione a un trainer.  
+**Tabella DB**: Potrebbe essere `letteraIncarico` o `appointmentLetter`  
+**Utilizzo**: Utilizzato per formalizzare l'incarico di un trainer per una specifica pianificazione.  
+**Esempio**: `generateLetteraIncarico()`, `letteraIncarico`
+
+## P
+
+### Pianificazione (Schedule)
+**Italiano**: Pianificazione  
+**Inglese**: Schedule  
+**Definizione**: Istanza di un corso programmato in date specifiche con un trainer specifico.  
+**Tabella DB**: `schedules`  
+**Campi rilevanti**:
+- `courseId` - Riferimento al corso
+- `trainerId` - Riferimento al trainer
+- `startDate` - Data di inizio
+- `endDate` - Data di fine
+- `deliveryMode` - Modalità di erogazione (es. in presenza, online)
+**Esempio**: `getSchedules()`, `scheduleId`
+
+## S
+
+### Sessione (Session)
+**Italiano**: Sessione  
+**Inglese**: Session  
+**Definizione**: Singola lezione all'interno di una pianificazione.  
+**Tabella DB**: `sessions`  
+**Relazioni**:
+- Ogni sessione appartiene a una pianificazione
+**Esempio**: `sessionId`, `getSessions()`
+
+## T
+
+### Tariffa Oraria
+**Italiano**: Tariffa Oraria  
+**Inglese**: Hourly Rate  
+**Definizione**: Compenso orario di un formatore per la conduzione di un corso.  
+**Campo DB**: `tariffaOraria` nella tabella `trainers`  
+**Formato**: Valore numerico rappresentante un importo in euro  
+**Esempio**: `formatore.tariffaOraria = 50.00`
+
+### Template
+**Italiano**: Template o Modello  
+**Inglese**: Template  
+**Definizione**: Documento base utilizzato per generare documenti come attestati o lettere di incarico.  
+**Tabella DB**: `templates`  
+**Relazioni**:
+- Un template può essere usato per generare molti attestati
+**Esempio**: `templateId`, `getTemplates()`
+
+## Altre Terminologie
+
+### Modalità di Erogazione (Delivery Mode)
+**Definizione**: Indica come viene erogato un corso.  
+**Valori possibili**:
+- `IN_PERSON` - In presenza
+- `ONLINE` - Online
+- `HYBRID` - Modalità mista
+
+### Anno Progressivo (Progressive Year)
+**Definizione**: Combinazione di anno e numero progressivo utilizzato per numerare gli attestati.  
+**Formato**: Tipicamente nel formato `YYYY-NNNN` (es. "2023-0001")  
+**Utilizzo**: Utilizzato per tracciare e identificare gli attestati in modo univoco e cronologico.
+
+### Partecipazione (Attendance)
+**Definizione**: Registrazione della partecipazione di un dipendente a una pianificazione.  
+**Tabella DB**: Potrebbe essere `scheduleAttendance`  
+**Campi rilevanti**:
+- `scheduleId` - Riferimento alla pianificazione
+- `employeeId` - Riferimento al dipendente
+- `attended` - Flag che indica se il dipendente ha effettivamente partecipato
+- `attendedDate` - Data di partecipazione

@@ -1,0 +1,400 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Definizioni di Tipo
+
+Questo documento descrive i principali tipi TypeScript utilizzati nel sistema, per garantire coerenza e comprensione del modello dati.
+
+## Entità Principali
+
+### Employee
+
+```typescript
+interface Employee {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  codiceFiscale: string; // Codice fiscale italiano
+  companyId: string;
+  departmentId: string | null;
+  photoUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface EmployeeCreate {
+  firstName: string;
+  lastName: string;
+  email: string;
+  codiceFiscale: string;
+  companyId: string;
+  departmentId?: string;
+  photoUrl?: string;
+}
+
+interface EmployeeUpdate {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  codiceFiscale?: string;
+  companyId?: string;
+  departmentId?: string;
+  photoUrl?: string;
+}
+```
+
+### Trainer
+
+```typescript
+interface Trainer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  specialties: string[]; // Array di specializzazioni
+  tariffaOraria: number; // Tariffa oraria
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TrainerCreate {
+  firstName: string;
+  lastName: string;
+  email: string;
+  specialties?: string[];
+  tariffaOraria?: number;
+}
+
+interface TrainerUpdate {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  specialties?: string[];
+  tariffaOraria?: number;
+}
+```
+
+### Company (Azienda)
+
+```typescript
+interface Company {
+  id: string;
+  name: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  vatNumber?: string; // Partita IVA
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CompanyCreate {
+  name: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  vatNumber?: string;
+}
+
+interface CompanyUpdate {
+  name?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  country?: string;
+  vatNumber?: string;
+}
+```
+
+### Course
+
+```typescript
+interface Course {
+  id: string;
+  title: string;
+  description?: string;
+  duration: number; // Durata in ore
+  price?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CourseCreate {
+  title: string;
+  description?: string;
+  duration: number;
+  price?: number;
+}
+
+interface CourseUpdate {
+  title?: string;
+  description?: string;
+  duration?: number;
+  price?: number;
+}
+```
+
+### Schedule
+
+```typescript
+enum DeliveryMode {
+  IN_PERSON = 'IN_PERSON',
+  ONLINE = 'ONLINE',
+  HYBRID = 'HYBRID'
+}
+
+interface Schedule {
+  id: string;
+  courseId: string;
+  trainerId: string;
+  companyId?: string;
+  startDate: string;
+  endDate: string;
+  deliveryMode: DeliveryMode;
+  location?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ScheduleCreate {
+  courseId: string;
+  trainerId: string;
+  companyId?: string;
+  startDate: string;
+  endDate: string;
+  deliveryMode: DeliveryMode;
+  location?: string;
+  notes?: string;
+}
+
+interface ScheduleUpdate {
+  courseId?: string;
+  trainerId?: string;
+  companyId?: string;
+  startDate?: string;
+  endDate?: string;
+  deliveryMode?: DeliveryMode;
+  location?: string;
+  notes?: string;
+}
+```
+
+### Department
+
+```typescript
+interface Department {
+  id: string;
+  name: string;
+  companyId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface DepartmentCreate {
+  name: string;
+  companyId: string;
+}
+
+interface DepartmentUpdate {
+  name?: string;
+  companyId?: string;
+}
+```
+
+### Attestato
+
+```typescript
+interface Attestato {
+  id: string;
+  scheduleId: string;
+  employeeId: string;
+  templateId: string;
+  annoProgressivo: number;
+  fileUrl?: string;
+  issued: boolean;
+  issuedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface AttestatoCreate {
+  scheduleId: string;
+  employeeId: string;
+  templateId: string;
+  annoProgressivo: number;
+  fileUrl?: string;
+  issued?: boolean;
+  issuedAt?: string;
+}
+
+interface AttestatoUpdate {
+  fileUrl?: string;
+  issued?: boolean;
+  issuedAt?: string;
+}
+```
+
+### Template
+
+```typescript
+interface Template {
+  id: string;
+  name: string;
+  description?: string;
+  fileUrl: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface TemplateCreate {
+  name: string;
+  description?: string;
+  fileUrl: string;
+}
+
+interface TemplateUpdate {
+  name?: string;
+  description?: string;
+  fileUrl?: string;
+}
+```
+
+## Tipi di Relazione
+
+### ScheduleAttendance (Iscrizioni ai Corsi)
+
+```typescript
+interface ScheduleAttendance {
+  id: string;
+  scheduleId: string;
+  employeeId: string;
+  attended: boolean;
+  attendedDate?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ScheduleAttendanceCreate {
+  scheduleId: string;
+  employeeId: string;
+  attended?: boolean;
+  attendedDate?: string;
+  notes?: string;
+}
+
+interface ScheduleAttendanceUpdate {
+  attended?: boolean;
+  attendedDate?: string;
+  notes?: string;
+}
+```
+
+## Tipi di Risposta API
+
+### Standard API Response
+
+```typescript
+interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+```
+
+### Paginazione
+
+```typescript
+interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+```
+
+## Tipi per le Opzioni di Ricerca
+
+### Opzioni di Filtro
+
+```typescript
+interface FilterOptions {
+  limit?: number;
+  offset?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+  search?: string;
+  [key: string]: any; // Filtri aggiuntivi specifici per entità
+}
+```
+
+### Filtri Specifici per Entità
+
+```typescript
+interface EmployeeFilterOptions extends FilterOptions {
+  companyId?: string;
+  departmentId?: string;
+}
+
+interface ScheduleFilterOptions extends FilterOptions {
+  courseId?: string;
+  trainerId?: string;
+  companyId?: string;
+  startDateFrom?: string;
+  startDateTo?: string;
+}
+```
+
+## Tipi per l'Autenticazione
+
+```typescript
+interface User {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: 'admin' | 'user';
+}
+
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+interface AuthResponse {
+  token: string;
+  user: User;
+}
+```
+
+## Tipi Utility
+
+### Error Handling
+
+```typescript
+interface ApiError extends Error {
+  statusCode?: number;
+  details?: any;
+}
+```
+
+### Form State
+
+```typescript
+interface FormState<T> {
+  data: T;
+  errors: Partial<Record<keyof T, string>>;
+  isSubmitting: boolean;
+  isValid: boolean;
+}
+```
+
+Questi tipi rappresentano la struttura dati principale del sistema e dovrebbero essere utilizzati coerentemente in tutta l'applicazione per garantire la tipizzazione corretta e la comprensione del modello dati.

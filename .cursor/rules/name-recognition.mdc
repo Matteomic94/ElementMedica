@@ -1,0 +1,254 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Tecniche di Riconoscimento di Componenti Esistenti
+
+Questo documento fornisce strategie concrete per identificare componenti, hook, utility e pattern esistenti nel progetto prima di crearne di nuovi, promuovendo il riutilizzo e la coerenza.
+
+## 🔎 Strategia di Ricerca Sistematica
+
+Prima di implementare qualsiasi nuova funzionalità, segui questa procedura sistematica di ricerca:
+
+### 1. Mappatura delle Directory Chiave
+
+| Tipo di Componente | Directory Principali | Cosa Cercare |
+|-------------------|---------------------|--------------|
+| **Componenti UI Base** | `src/components/ui/` | Bottoni, input, modali, tabelle, etc. |
+| **Componenti Funzionali** | `src/components/[area funzionale]/` | Componenti specifici per area (employees, courses, etc.) |
+| **Hook Personalizzati** | `src/hooks/` | Gestione stato, chiamate API, form, etc. |
+| **Servizi API** | `src/services/` | Servizi per comunicazione con backend |
+| **Utility** | `src/lib/` o `src/utils/` | Funzioni helper, formattazione, validazione |
+| **Tipi/Interfacce** | `src/types/` | Definizioni TypeScript per entità |
+
+### 2. Pattern di Nomenclatura da Riconoscere
+
+| Prefisso/Suffisso | Tipo di Componente | Esempi |
+|-------------------|-------------------|--------|
+| `use...` | Hook React | `useEmployees`, `useForm`, `useErrorHandler` |
+| `...Provider` | Context Provider | `AuthProvider`, `ThemeProvider` |
+| `...Context` | React Context | `EmployeeContext`, `AppContext` |
+| `...Service` | Servizio API | `employeeService`, `courseService` |
+| `...Utils` o `...Helpers` | Funzioni utility | `dateUtils`, `formatHelpers` |
+| `...List` | Componente lista | `EmployeeList`, `CourseList` |
+| `...Form` | Componente form | `EmployeeForm`, `CourseForm` |
+| `...Details` | Componente dettagli | `EmployeeDetails`, `CourseDetails` |
+
+## 🧩 Tecniche di Identificazione per Tipologia
+
+### Componenti UI Base
+
+1. **Cerca nei file di componenti UI**:
+   ```bash
+   # Esempi di comandi per cercare componenti
+   grep -r "export.*Button" src/components/ui/
+   grep -r "export.*Table" src/components/ui/
+   grep -r "export.*Modal" src/components/ui/
+   ```
+
+2. **Controlla in questi file comuni**:
+   - `Button.tsx` o `Button/index.tsx`
+   - `Input.tsx` o `FormElements.tsx`
+   - `Modal.tsx`
+   - `Table.tsx`
+   - `Card.tsx`
+   - `common/index.ts` (potrebbe esportare componenti UI)
+
+3. **Identifica da importazioni esistenti**:
+   ```bash
+   # Trova dove sono importati i componenti UI
+   grep -r "import.*Button" src/
+   ```
+
+### Hook Personalizzati
+
+1. **Cerca file che iniziano con "use"**:
+   ```bash
+   # Trova tutti gli hook personalizzati
+   find src/hooks -name "use*.ts" -o -name "use*.tsx"
+   ```
+
+2. **Cerca pattern comuni di hook**:
+   ```bash
+   # Cerca hook per gestione form, errori, etc.
+   grep -r "useForm" src/
+   grep -r "useError" src/
+   grep -r "useFetch" src/
+   ```
+
+3. **Esamina i file index in cartelle di hook**:
+   - `src/hooks/index.ts` (potrebbe esportare tutti gli hook)
+   - `src/hooks/api/index.ts` (hook per chiamate API)
+
+### Servizi API
+
+1. **Identifica il pattern factory**:
+   ```bash
+   # Trova il factory pattern per i servizi
+   grep -r "createService" src/
+   ```
+
+2. **Cerca servizi per ciascuna entità principale**:
+   ```bash
+   # Cerca servizi esistenti
+   find src/services -name "*service*.ts"
+   grep -r "export const.*Service" src/services/
+   ```
+
+3. **Esamina implementazioni esistenti**:
+   - `src/services/employees.ts`
+   - `src/services/courses.ts`
+   - `src/services/serviceFactory.ts`
+
+### Utility e Helper
+
+1. **Cerca funzioni comuni**:
+   ```bash
+   # Trova utility per date, stringhe, etc.
+   grep -r "format.*Date" src/
+   grep -r "validate.*" src/
+   ```
+
+2. **Controlla in utility centralizzate**:
+   - `src/utils/index.ts` o `src/lib/utils.ts`
+   - `src/utils/formatting.ts`
+   - `src/utils/validation.ts`
+
+## 🧠 Riconoscimento di Pattern Implementativi
+
+### Gestione Stato
+
+1. **Identifica i Context Provider**:
+   ```bash
+   # Trova context provider esistenti
+   grep -r "createContext" src/
+   grep -r "export const.*Context" src/
+   ```
+
+2. **Esamina l'approccio alla gestione dello stato**:
+   - Verifica se viene utilizzato Redux, Context API o altro
+   - Cerca `src/context/` o `src/store/` per implementazioni centralizzate
+   - Osserva come componenti container gestiscono lo stato locale
+
+### Pattern di Composizione UI
+
+1. **Identifica il pattern Container/Presentational**:
+   - Cerca coppie di file come `EmployeeList.tsx` e `EmployeeListContainer.tsx`
+   - Osserva come vengono passate le props tra componenti
+
+2. **Cerca l'utilizzo di HOC (Higher-Order Components)**:
+   ```bash
+   # Trova pattern HOC
+   grep -r "export default.*with" src/
+   ```
+
+3. **Identifica pattern di layout**:
+   - Cerca `Layout.tsx` o componenti simili in `src/components/layouts/`
+   - Osserva come viene strutturata l'UI nelle pagine esistenti
+
+### Pattern di Gestione Errori
+
+1. **Identifica il pattern di gestione errori**:
+   ```bash
+   # Trova gestione errori
+   grep -r "try.*catch" src/
+   grep -r "handleError" src/
+   ```
+
+2. **Cerca componenti di fallback**:
+   - `ErrorBoundary.tsx`
+   - `ErrorMessage.tsx` o simili
+
+## 📋 Checklist di Riconoscimento
+
+Prima di implementare un nuovo componente, hook o servizio, verifica:
+
+- [ ] Ho cercato nei file principali della directory relativa
+- [ ] Ho controllato i file index per esportazioni
+- [ ] Ho cercato componenti con nomi simili o funzionalità analoghe
+- [ ] Ho cercato utilizzi esistenti in altre parti dell'applicazione
+- [ ] Ho verificato se esiste già un pattern stabilito per questo tipo di funzionalità
+- [ ] Ho controllato se esiste documentazione specifica nel codice (JSDoc)
+
+## 🔑 Tecniche Avanzate di Ricognizione
+
+### 1. Analisi dell'Implementazione Esistente
+
+Per capire completamente un componente esistente:
+
+1. **Segui la traccia delle importazioni**:
+   - Identifica dove viene importato il componente
+   - Osserva quali props vengono passate
+   - Controlla come vengono gestiti i casi d'uso diversi
+
+2. **Analizza la struttura interna**:
+   - Osserva come viene gestito lo stato
+   - Identifica pattern di effetti collaterali
+   - Verifica la gestione degli errori
+
+3. **Cerca casi di test**:
+   - I file di test (`*.test.ts`, `*.test.tsx`) spesso rivelano casi d'uso importanti
+   - Esaminali per comprendere i comportamenti attesi
+
+### 2. Mappa Mentale dei Componenti Correlati
+
+Per una funzionalità come "gestione dipendenti":
+
+1. **Identifica la catena completa**:
+   - Pagina → Container → Componente presentazionale
+   - Form di creazione/modifica
+   - Servizio API
+   - Tipi/interfacce
+   - Hook personalizzati
+
+2. **Documenta le relazioni**:
+   - Come i dati fluiscono tra componenti
+   - Come vengono gestiti gli eventi
+   - Quali utility vengono utilizzate
+
+## 📊 Esempio Pratico: Riconoscimento di una Funzionalità Completa
+
+### Scenario: Devo implementare una nuova funzionalità per la gestione di "certificazioni"
+
+**Passo 1: Cercare entità simili**
+- Cercare altre entità gestite (es. employees, courses)
+- Identificare il pattern di implementazione completo
+
+**Passo 2: Mappare i file tipici**
+- `src/pages/certificates/` - Pagine
+- `src/components/certificates/` - Componenti
+- `src/services/certificates.ts` - Servizio API
+- `src/types/certificate.ts` - Definizione tipi
+- `src/hooks/useCertificates.ts` - Hook personalizzati
+
+**Passo 3: Identificare pattern di implementazione**
+- Verificare come altre entità gestiscono CRUD
+- Verificare come vengono visualizzate liste e dettagli
+- Identificare come vengono gestiti i form
+
+**Passo 4: Riutilizzare componenti di base**
+- Utilizzare gli stessi componenti UI (Button, Table, Form elements)
+- Riutilizzare gestione errori con useErrorHandler
+- Seguire lo stesso pattern per i servizi API
+
+## ⚠️ Segnali di Allarme
+
+Questi segnali indicano che potresti non aver identificato componenti esistenti:
+
+1. **Stai scrivendo codice molto simile a funzionalità esistenti**
+2. **Stai duplicando logica di validazione o formattazione**
+3. **Il tuo approccio differisce significativamente dai pattern esistenti**
+4. **Stai creando un nuovo componente UI di base (button, input, etc.)**
+5. **Stai implementando gestione errori o stato in modo personalizzato**
+
+Se riscontri uno di questi segnali, fermati e ricerca nuovamente.
+
+## 💡 Note Finali
+
+- **Prioritizza sempre** il riutilizzo di componenti esistenti
+- **Estendi piuttosto che duplicare** quando serve una variante
+- **Segui i pattern esistenti** anche quando crei componenti nuovi
+- **In caso di dubbio**, esamina implementazioni simili prima di procedere
+
+Il principio fondamentale è: "Non reinventare la ruota". Qualsiasi funzionalità tu debba implementare, è probabile che elementi simili esistano già e possano essere riutilizzati o estesi.

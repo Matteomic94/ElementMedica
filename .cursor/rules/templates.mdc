@@ -1,0 +1,760 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Template per Nuovi Componenti e File
+
+Questo documento fornisce template standardizzati per la creazione di nuovi file nel progetto, garantendo coerenza e aderenza ai pattern stabiliti.
+
+## Indice dei Template
+- [Componente React Funzionale](mdc:#componente-react-funzionale)
+- [Componente Container](mdc:#componente-container)
+- [Componente Presentazionale](mdc:#componente-presentazionale)
+- [Form Component](mdc:#form-component)
+- [Custom Hook](mdc:#custom-hook)
+- [Servizio API](mdc:#servizio-api)
+- [Tipi e Interfacce](mdc:#tipi-e-interfacce)
+- [Utility Function](mdc:#utility-function)
+
+## Componente React Funzionale
+
+```tsx
+/**
+ * Componente per [descrizione breve].
+ * 
+ * [Descrizione dettagliata della funzionalità del componente]
+ */
+
+import React from 'react';
+import { classNames } from '../../lib/utils';
+
+// Definire l'interfaccia per le props
+interface ButtonProps {
+  /** Testo da visualizzare nel bottone */
+  label: string;
+  /** Funzione da eseguire al click */
+  onClick: () => void;
+  /** Variante stilistica del bottone */
+  variant?: 'primary' | 'secondary' | 'danger';
+  /** Se il bottone è disabilitato */
+  disabled?: boolean;
+  /** Classi CSS aggiuntive */
+  className?: string;
+}
+
+/**
+ * Componente Button riutilizzabile con varianti di stile.
+ */
+export const Button: React.FC<ButtonProps> = ({
+  label,
+  onClick,
+  variant = 'primary',
+  disabled = false,
+  className = '',
+}) => {
+  // Definire stili base e varianti
+  const baseClasses = 'px-4 py-2 rounded focus:outline-none focus:ring-2';
+  const variantClasses = {
+    primary: 'bg-blue-500 text-white hover:bg-blue-600',
+    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
+    danger: 'bg-red-500 text-white hover:bg-red-600',
+  };
+  
+  // Combinare le classi
+  const buttonClasses = classNames(
+    baseClasses,
+    variantClasses[variant],
+    disabled ? 'opacity-50 cursor-not-allowed' : '',
+    className
+  );
+  
+  return (
+    <button
+      className={buttonClasses}
+      onClick={onClick}
+      disabled={disabled}
+      type="button"
+    >
+      {label}
+    </button>
+  );
+};
+
+export default Button;
+```
+
+## Componente Container
+
+```tsx
+/**
+ * Container per [descrizione].
+ * 
+ * Gestisce lo stato e la logica di business per [funzionalità].
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { getEntities } from '../../services/entities';
+import EntityList from './EntityList';
+import type { Entity } from '../../types';
+
+/**
+ * Container che gestisce la logica per la lista di entità.
+ */
+export const EntityListContainer: React.FC = () => {
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { error, handleError, clearError } = useErrorHandler();
+  
+  const fetchEntities = useCallback(async () => {
+    setLoading(true);
+    clearError();
+    
+    try {
+      const data = await getEntities();
+      setEntities(data);
+    } catch (err) {
+      handleError(err, 'Impossibile recuperare le entità');
+    } finally {
+      setLoading(false);
+    }
+  }, [handleError, clearError]);
+  
+  useEffect(() => {
+    fetchEntities();
+  }, [fetchEntities]);
+  
+  // Funzioni di gestione degli eventi
+  const handleRefresh = () => {
+    fetchEntities();
+  };
+  
+  return (
+    <EntityList 
+      entities={entities}
+      loading={loading}
+      error={error}
+      onRefresh={handleRefresh}
+    />
+  );
+};
+
+export default EntityListContainer;
+```
+
+## Componente Presentazionale
+
+```tsx
+/**
+ * Componente presentazionale per [descrizione].
+ * 
+ * Visualizza [dettagli su cosa mostra] senza gestire logica di business.
+ */
+
+import React from 'react';
+import { ApiError } from '../../hooks/useErrorHandler';
+import type { Entity } from '../../types';
+
+// Definire l'interfaccia per le props
+interface EntityListProps {
+  /** Array di entità da visualizzare */
+  entities: Entity[];
+  /** Stato di caricamento */
+  loading: boolean;
+  /** Stato di errore */
+  error: ApiError | null;
+  /** Callback per aggiornare la lista */
+  onRefresh: () => void;
+}
+
+/**
+ * Componente che visualizza una lista di entità.
+ */
+export const EntityList: React.FC<EntityListProps> = ({
+  entities,
+  loading,
+  error,
+  onRefresh,
+}) => {
+  // Renderizzazione degli stati
+  if (loading) {
+    return <div className="p-4 text-center">Caricamento in corso...</div>;
+  }
+  
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-500">
+        <p>Si è verificato un errore: {error.message}</p>
+        <button 
+          onClick={onRefresh}
+          className="mt-2 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Riprova
+        </button>
+      </div>
+    );
+  }
+  
+  if (entities.length === 0) {
+    return <div className="p-4 text-center">Nessuna entità trovata.</div>;
+  }
+  
+  // Renderizzazione del contenuto
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between">
+        <h2 className="text-xl font-semibold">Elenco Entità</h2>
+        <button 
+          onClick={onRefresh}
+          className="px-3 py-1 bg-blue-500 text-white rounded"
+        >
+          Aggiorna
+        </button>
+      </div>
+      
+      <ul className="divide-y divide-gray-200">
+        {entities.map(entity => (
+          <li key={entity.id} className="py-3">
+            {entity.name}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default EntityList;
+```
+
+## Form Component
+
+```tsx
+/**
+ * Form per [descrizione].
+ * 
+ * Gestisce [operazione] di un/una [entità].
+ */
+
+import React, { useState } from 'react';
+import { useErrorHandler } from '../../hooks/useErrorHandler';
+import { createEntity } from '../../services/entities';
+import type { EntityCreate } from '../../types';
+
+interface EntityFormProps {
+  /** Callback chiamato dopo il salvataggio con successo */
+  onSuccess: (data: EntityCreate) => void;
+  /** Callback chiamato per annullare l'operazione */
+  onCancel: () => void;
+}
+
+export const EntityForm: React.FC<EntityFormProps> = ({
+  onSuccess,
+  onCancel,
+}) => {
+  // Stato del form
+  const [formData, setFormData] = useState<EntityCreate>({
+    name: '',
+    description: '',
+  });
+  
+  // Stato di validazione
+  const [errors, setErrors] = useState<Partial<Record<keyof EntityCreate, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  
+  // Gestione errori
+  const { handleError } = useErrorHandler();
+  
+  // Gestione input
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Pulizia errori quando l'utente modifica un campo
+    if (errors[name as keyof EntityCreate]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+  
+  // Validazione
+  const validate = (): boolean => {
+    const newErrors: Partial<Record<keyof EntityCreate, string>> = {};
+    
+    if (!formData.name) {
+      newErrors.name = 'Il nome è obbligatorio';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  // Invio del form
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validate()) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      await createEntity(formData);
+      onSuccess(formData);
+    } catch (error) {
+      handleError(error, 'Impossibile creare l\'entità');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Nome
+        </label>
+        <input
+          id="name"
+          name="name"
+          type="text"
+          value={formData.name}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          className={`mt-1 block w-full rounded-md border ${
+            errors.name ? 'border-red-500' : 'border-gray-300'
+          } p-2`}
+        />
+        {errors.name && (
+          <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+        )}
+      </div>
+      
+      <div>
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          Descrizione
+        </label>
+        <textarea
+          id="description"
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          disabled={isSubmitting}
+          rows={3}
+          className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+        />
+      </div>
+      
+      <div className="flex justify-end space-x-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-gray-200 text-gray-800 rounded"
+        >
+          Annulla
+        </button>
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          {isSubmitting ? 'Salvataggio...' : 'Salva'}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default EntityForm;
+```
+
+## Custom Hook
+
+```typescript
+/**
+ * Hook personalizzato per [descrizione].
+ * 
+ * Fornisce funzionalità per [dettagli].
+ * 
+ * @module hooks/useEntities
+ */
+
+import { useState, useCallback, useEffect } from 'react';
+import { useErrorHandler } from './useErrorHandler';
+import { getEntities, createEntity, updateEntity, deleteEntity } from '../services/entities';
+import type { Entity, EntityCreate, EntityUpdate } from '../types';
+
+/**
+ * Risultato restituito dall'hook useEntities
+ */
+interface UseEntitiesResult {
+  /** Lista delle entità */
+  entities: Entity[];
+  /** Stato di caricamento */
+  loading: boolean;
+  /** Funzione per recuperare le entità */
+  fetchEntities: () => Promise<void>;
+  /** Funzione per creare una nuova entità */
+  createEntity: (data: EntityCreate) => Promise<Entity | null>;
+  /** Funzione per aggiornare un'entità esistente */
+  updateEntity: (id: string, data: EntityUpdate) => Promise<Entity | null>;
+  /** Funzione per eliminare un'entità */
+  deleteEntity: (id: string) => Promise<boolean>;
+}
+
+/**
+ * Hook per la gestione delle operazioni CRUD sulle entità.
+ * 
+ * @example
+ * ```tsx
+ * const { 
+ *   entities, 
+ *   loading, 
+ *   fetchEntities,
+ *   createEntity 
+ * } = useEntities();
+ * 
+ * // Recuperare le entità
+ * useEffect(() => {
+ *   fetchEntities();
+ * }, [fetchEntities]);
+ * 
+ * // Creare una nuova entità
+ * const handleCreate = async (data) => {
+ *   const newEntity = await createEntity(data);
+ *   if (newEntity) {
+ *     // Success
+ *   }
+ * };
+ * ```
+ */
+export function useEntities(): UseEntitiesResult {
+  const [entities, setEntities] = useState<Entity[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { wrapAsync } = useErrorHandler();
+  
+  const fetchEntities = useCallback(async () => {
+    setLoading(true);
+    
+    const data = await wrapAsync(getEntities(), {
+      showToast: true,
+      onError: () => {
+        setEntities([]);
+      }
+    });
+    
+    if (data) {
+      setEntities(data);
+    }
+    
+    setLoading(false);
+  }, [wrapAsync]);
+  
+  const createNewEntity = useCallback(async (data: EntityCreate): Promise<Entity | null> => {
+    return wrapAsync(createEntity(data), {
+      showToast: true,
+      onError: () => {}
+    });
+  }, [wrapAsync]);
+  
+  const updateExistingEntity = useCallback(async (id: string, data: EntityUpdate): Promise<Entity | null> => {
+    const updated = await wrapAsync(updateEntity(id, data), {
+      showToast: true
+    });
+    
+    if (updated) {
+      setEntities(prev => prev.map(entity => entity.id === id ? updated : entity));
+    }
+    
+    return updated;
+  }, [wrapAsync]);
+  
+  const deleteExistingEntity = useCallback(async (id: string): Promise<boolean> => {
+    const success = await wrapAsync(deleteEntity(id), {
+      showToast: true
+    });
+    
+    if (success) {
+      setEntities(prev => prev.filter(entity => entity.id !== id));
+      return true;
+    }
+    
+    return false;
+  }, [wrapAsync]);
+  
+  return {
+    entities,
+    loading,
+    fetchEntities,
+    createEntity: createNewEntity,
+    updateEntity: updateExistingEntity,
+    deleteEntity: deleteExistingEntity
+  };
+}
+
+export default useEntities;
+```
+
+## Servizio API
+
+```typescript
+/**
+ * Servizio per la gestione delle [entità].
+ * 
+ * Fornisce funzioni per interagire con le API relative a [entità].
+ */
+
+import { createService } from './serviceFactory';
+import { API_ENDPOINTS } from '../config/api';
+import type { Entity, EntityCreate, EntityUpdate } from '../types';
+
+// Creazione del servizio base utilizzando il factory pattern
+const baseService = createService<Entity, EntityCreate, EntityUpdate>(API_ENDPOINTS.ENTITIES);
+
+// Estensione con metodi personalizzati
+const entityService = baseService.extend({
+  /**
+   * Metodo personalizzato per recuperare entità filtrate
+   * @param param - Parametro di filtro
+   * @returns Promise che restituisce le entità filtrate
+   */
+  getByFilter: async (param: string): Promise<Entity[]> => {
+    // Implementazione...
+    const url = `${API_ENDPOINTS.ENTITIES}/filter/${param}`;
+    // Logica specifica...
+    return [];
+  }
+});
+
+// Esportazione dei metodi standard
+export const getEntities = entityService.getAll;
+export const getEntity = entityService.getById;
+export const createEntity = entityService.create;
+export const updateEntity = entityService.update;
+export const deleteEntity = entityService.delete;
+
+// Esportazione dei metodi personalizzati
+export const getEntitiesByFilter = entityService.getByFilter;
+
+// Esportazione dell'intero servizio
+export default entityService;
+```
+
+## Tipi e Interfacce
+
+```typescript
+/**
+ * Definizioni di tipo per [entità].
+ * 
+ * Questo file contiene tutte le interfacce TypeScript relative a [entità].
+ */
+
+/**
+ * Rappresenta un'entità nel sistema
+ */
+export interface Entity {
+  /** Identificatore univoco */
+  id: string;
+  /** Nome dell'entità */
+  name: string;
+  /** Descrizione opzionale */
+  description?: string;
+  /** Data di creazione */
+  createdAt: string;
+  /** Data di ultimo aggiornamento */
+  updatedAt: string;
+}
+
+/**
+ * Dati necessari per la creazione di una nuova entità
+ */
+export interface EntityCreate {
+  /** Nome dell'entità (obbligatorio) */
+  name: string;
+  /** Descrizione opzionale */
+  description?: string;
+}
+
+/**
+ * Dati per l'aggiornamento di un'entità esistente
+ * Tutti i campi sono opzionali
+ */
+export interface EntityUpdate {
+  /** Nome dell'entità */
+  name?: string;
+  /** Descrizione */
+  description?: string;
+}
+
+/**
+ * Opzioni per il filtraggio delle entità
+ */
+export interface EntityFilterOptions {
+  /** Termine di ricerca */
+  search?: string;
+  /** Campo per l'ordinamento */
+  sortBy?: keyof Entity;
+  /** Direzione dell'ordinamento */
+  sortOrder?: 'asc' | 'desc';
+  /** Numero massimo di risultati */
+  limit?: number;
+  /** Offset per la paginazione */
+  offset?: number;
+}
+
+/**
+ * Risposta paginata per le entità
+ */
+export interface PaginatedEntityResponse {
+  /** Array di entità */
+  items: Entity[];
+  /** Numero totale di entità */
+  total: number;
+  /** Pagina corrente */
+  page: number;
+  /** Limite per pagina */
+  limit: number;
+  /** Numero totale di pagine */
+  totalPages: number;
+}
+
+/**
+ * Stato di un'entità
+ */
+export enum EntityStatus {
+  /** Attivo */
+  ACTIVE = 'ACTIVE',
+  /** Inattivo */
+  INACTIVE = 'INACTIVE',
+  /** In sospeso */
+  PENDING = 'PENDING',
+}
+```
+
+## Utility Function
+
+```typescript
+/**
+ * Utility per [descrizione].
+ * 
+ * Fornisce funzionalità per [dettaglio].
+ */
+
+/**
+ * Formatta una data nel formato italiano
+ * @param date - Data da formattare
+ * @param includeTime - Se includere l'orario nella formattazione
+ * @returns Data formattata come stringa
+ */
+export function formatDate(date: string | Date, includeTime = false): string {
+  if (!date) return '';
+  
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  };
+  
+  if (includeTime) {
+    options.hour = '2-digit';
+    options.minute = '2-digit';
+  }
+  
+  return dateObj.toLocaleDateString('it-IT', options);
+}
+
+/**
+ * Filtra un array di oggetti in base a una stringa di ricerca
+ * @param items - Array di oggetti da filtrare
+ * @param searchTerm - Termine di ricerca
+ * @param searchFields - Campi su cui effettuare la ricerca
+ * @returns Array filtrato
+ */
+export function filterItems<T>(
+  items: T[],
+  searchTerm: string,
+  searchFields: (keyof T)[]
+): T[] {
+  if (!searchTerm || !searchFields.length) return items;
+  
+  const normalizedSearchTerm = searchTerm.toLowerCase().trim();
+  
+  return items.filter(item => {
+    return searchFields.some(field => {
+      const value = item[field];
+      if (value === null || value === undefined) return false;
+      
+      return String(value).toLowerCase().includes(normalizedSearchTerm);
+    });
+  });
+}
+
+/**
+ * Ordina un array di oggetti per un campo specifico
+ * @param items - Array di oggetti da ordinare
+ * @param sortBy - Campo per l'ordinamento
+ * @param sortOrder - Direzione dell'ordinamento
+ * @returns Array ordinato
+ */
+export function sortItems<T>(
+  items: T[],
+  sortBy: keyof T,
+  sortOrder: 'asc' | 'desc' = 'asc'
+): T[] {
+  return [...items].sort((a, b) => {
+    const valueA = a[sortBy];
+    const valueB = b[sortBy];
+    
+    if (valueA === valueB) return 0;
+    
+    if (valueA === null || valueA === undefined) return sortOrder === 'asc' ? -1 : 1;
+    if (valueB === null || valueB === undefined) return sortOrder === 'asc' ? 1 : -1;
+    
+    if (typeof valueA === 'string' && typeof valueB === 'string') {
+      return sortOrder === 'asc'
+        ? valueA.localeCompare(valueB)
+        : valueB.localeCompare(valueA);
+    }
+    
+    return sortOrder === 'asc'
+      ? (valueA < valueB ? -1 : 1)
+      : (valueA < valueB ? 1 : -1);
+  });
+}
+
+/**
+ * Raggruppa un array di oggetti per un campo specifico
+ * @param items - Array di oggetti da raggruppare
+ * @param key - Campo per il raggruppamento
+ * @returns Oggetto con gli elementi raggruppati
+ */
+export function groupBy<T>(items: T[], key: keyof T): Record<string, T[]> {
+  return items.reduce((result, item) => {
+    const groupKey = String(item[key]);
+    
+    if (!result[groupKey]) {
+      result[groupKey] = [];
+    }
+    
+    result[groupKey].push(item);
+    return result;
+  }, {} as Record<string, T[]>);
+}
+```
+
+## Note sull'Utilizzo dei Template
+
+Quando utilizzi questi template:
+
+1. **Sostituisci i placeholder** come `[descrizione]`, `[entità]`, ecc. con contenuti specifici per il tuo caso d'uso.
+
+2. **Rimuovi parti non necessarie** se non sono rilevanti per il tuo componente o funzione.
+
+3. **Mantieni la documentazione JSDoc** per garantire che il codice sia ben documentato.
+
+4. **Segui le convenzioni di nomenclatura** definite in [Naming Conventions](mdc:naming-conventions.mdc).
+
+5. **Rispetta i pattern esistenti** come definito in [Common Patterns](mdc:common-patterns.mdc).
+
+6. **Verifica le sezioni critiche** come definito in [Critical Sections](mdc:critical-sections.mdc) prima di modificare parti sensibili del codice.

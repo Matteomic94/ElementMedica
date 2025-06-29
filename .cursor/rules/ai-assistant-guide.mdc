@@ -1,0 +1,119 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Guida per l'Assistente IA
+
+Questo documento fornisce linee guida specifiche per gli assistenti IA che lavorano su questo progetto, per garantire coerenza e prevenire problemi comuni.
+
+## Comprendere la Struttura del Progetto
+
+Per comprendere rapidamente la struttura del progetto, consulta:
+
+1. `.cursor/rules/project-structure.mdc` - Panoramica della struttura generale
+2. `.cursor/rules/frontend-architecture.mdc` - Dettagli sull'architettura frontend
+3. `.cursor/rules/backend-architecture.mdc` - Dettagli sull'architettura backend
+4. `.cursor/rules/database-schema.mdc` - Informazioni sullo schema del database
+
+Questi file forniscono una mappa mentale dell'organizzazione del progetto.
+
+## Convenzioni Codice
+
+Prima di modificare o generare nuovo codice, consulta:
+
+1. `.cursor/rules/naming-conventions.mdc` - Convenzioni di nomenclatura
+2. `.cursor/rules/common-patterns.mdc` - Pattern comuni utilizzati nel progetto
+3. `.cursor/rules/api-guidelines.mdc` - Linee guida per le API
+
+## Sezioni Critiche
+
+Prima di modificare parti sensibili del codice, consulta:
+
+1. `.cursor/rules/critical-sections.mdc` - Documenta le aree del codice che richiedono particolare attenzione
+
+## Strategie per Comprendere il Codice Esistente
+
+1. **Analizza il Flusso di Dati**: Prima di proporre modifiche, assicurati di comprendere come i dati fluiscono attraverso il componente o servizio.
+
+2. **Identifica Pattern Esistenti**: Cerca pattern ripetuti nel codice esistente e seguili.
+
+3. **Esamina i Context e gli Hook**: I context e gli hook personalizzati forniscono informazioni cruciali sul funzionamento dell'applicazione.
+
+4. **Segui la Catena di Chiamate API**: Per comprendere una funzionalità, segui il percorso dalla UI al servizio API e al database.
+
+## Regole per Modificare il Codice
+
+1. **Non Modificare le Configurazioni dei Server**: Non cambiare le porte o le configurazioni server esistenti.
+
+2. **Utilizza i Pattern Factory**: Quando crei nuovi servizi API, utilizza sempre il pattern factory esistente.
+
+3. **Mantieni la Coerenza con lo Stile Esistente**: Segui lo stile del codice esistente.
+
+4. **Non Rimuovere Funzionalità Esistenti**: Non rimuovere componenti UI, funzioni o pulsanti senza esplicita richiesta.
+
+5. **Implementa Correttamente i Type**: Assicurati che tutti i componenti e le funzioni abbiano tipi TypeScript appropriati.
+
+## Regole per Aggiungere Nuovo Codice
+
+1. **Verifica Componenti Esistenti Prima**: Cerca sempre componenti o utility esistenti prima di crearne di nuovi.
+
+2. **Documenta con JSDoc**: Aggiungi commenti JSDoc a funzioni e componenti importanti.
+
+3. **Utilizza Nomi Coerenti**: Segui le convenzioni di nomenclatura esistenti.
+
+4. **Aggiungi Test Quando Necessario**: Crea test per le nuove funzionalità significative.
+
+## Come Affrontare Punti Problematici Comuni
+
+1. **Terminologia Multilingue**: Il progetto utilizza sia l'italiano che l'inglese. Verifica i termini esistenti prima di introdurne di nuovi. Vedi `.cursor/rules/multilingual-aspects.mdc`.
+
+2. **Struttura dei Form Complessi**: Per i form complessi, verifica componenti simili esistenti e segui lo stesso pattern.
+
+3. **Generazione Documenti**: Per la generazione di documenti, presta particolare attenzione ai servizi esistenti e non modificare i formati, poiché potrebbero essere legalmente vincolanti.
+
+4. **Relazioni nel Database**: Prima di proporre modifiche alle relazioni nel database, comprendi lo schema esistente esaminando i file di migrazione Prisma.
+
+## Framework e Librerie Utilizzate
+
+- **Frontend**: React, probabilmente Next.js
+- **Styling**: Probabilmente Tailwind CSS
+- **Backend**: Node.js
+- **Database ORM**: Prisma
+- **API**: REST
+- **Autenticazione**: Probabilmente JWT
+
+## Approccio alle Richieste di Assistenza
+
+1. **Comprendi il Contesto**: Prima di rispondere a una richiesta, assicurati di comprendere il contesto e l'obiettivo dell'utente.
+
+2. **Analizza l'Esistente**: Esamina sempre il codice esistente prima di proporre soluzioni.
+
+3. **Proponi Soluzioni Coerenti**: Le tue soluzioni dovrebbero essere coerenti con il resto dell'applicazione.
+
+4. **Spiega il Ragionamento**: Spiega brevemente il ragionamento dietro le tue soluzioni.
+
+5. **Consiglia Best Practices**: Suggerisci miglioramenti quando appropriato, ma mantieni la coerenza con lo stile esistente.
+
+## Come Interpretare la Nomenclatura Specifica del Progetto
+
+Il progetto utilizza alcuni termini specifici:
+
+- **Aziende**: Entità aziendali (equivalente a "Companies" in inglese)
+- **Attestati**: Certificati
+- **Tariffa Oraria**: Tariffa oraria per i trainer
+- **Codice Fiscale**: Codice fiscale italiano (identificativo fiscale personale)
+
+## Errori Comuni da Evitare
+
+1. **NON proporre nuovi server**: L'architettura server è fissa con API Server (4001), Documents Server (4002) e Proxy Server (4003).
+
+2. **NON generare chiamate API al di fuori del pattern factory**.
+
+3. **NON dimenticare di gestire gli errori** nelle chiamate API.
+
+4. **NON proporre modifiche invasive** alla struttura del progetto.
+
+5. **NON ignorare le convenzioni di nomenclatura** esistenti.
+
+Seguendo queste linee guida, potrai fornire assistenza più accurata e coerente per questo progetto.

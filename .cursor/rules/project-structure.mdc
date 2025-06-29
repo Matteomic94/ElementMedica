@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project Structure
+
+This is a full-stack web application with the following main components:
+
+- `backend/` - Node.js backend with Prisma ORM for database operations
+  - `prisma/` - Database schema definition
+  - `routes/` - API endpoints
+  - `uploads/` - Storage for documents
+  - `generated/` - Auto-generated code files
+
+- `src/` - Frontend React application
+  - `app/` - Next.js app router components
+  - `components/` - Reusable UI components
+  - `pages/` - Page components and routes
+  - `api/` - API client for backend communication
+  - `services/` - Business logic services
+  - `types/` - TypeScript type definitions
+  - `hooks/` - Custom React hooks
+  - `lib/` - Utility functions and helpers
+
+- `public/` - Static assets
+- `shared/` - Code shared between frontend and backend
+
+## Key Areas
+
+- User management (employees, trainers)
+- Course management 
+- Company management
+- Schedule and attendance tracking
+- Document generation (attestati/certificates)

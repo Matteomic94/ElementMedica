@@ -1,0 +1,193 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2023-06-08T14:15:00Z",
+  "hooks": {
+    "data": {
+      "useEmployees": {
+        "path": "src/hooks/api/useEmployees.ts",
+        "parameters": ["options"],
+        "returns": ["employees", "loading", "error", "refetch", "mutate"],
+        "description": "Hook per gestire il recupero e la manipolazione dei dipendenti",
+        "usageExamples": [
+          "src/components/employees/EmployeeList.tsx",
+          "src/pages/employees/index.tsx"
+        ]
+      },
+      "useCourses": {
+        "path": "src/hooks/api/useCourses.ts",
+        "parameters": ["options"],
+        "returns": ["courses", "loading", "error", "refetch", "mutate"],
+        "description": "Hook per gestire il recupero e la manipolazione dei corsi",
+        "usageExamples": [
+          "src/components/courses/CourseList.tsx",
+          "src/pages/courses/index.tsx"
+        ]
+      },
+      "useCompanies": {
+        "path": "src/hooks/api/useCompanies.ts",
+        "parameters": ["options"],
+        "returns": ["companies", "loading", "error", "refetch", "mutate"],
+        "description": "Hook per gestire il recupero e la manipolazione delle aziende",
+        "usageExamples": [
+          "src/components/companies/CompanyList.tsx",
+          "src/pages/companies/index.tsx"
+        ]
+      },
+      "useTrainers": {
+        "path": "src/hooks/api/useTrainers.ts",
+        "parameters": ["options"],
+        "returns": ["trainers", "loading", "error", "refetch", "mutate"],
+        "description": "Hook per gestire il recupero e la manipolazione dei trainer",
+        "usageExamples": [
+          "src/components/trainers/TrainerList.tsx",
+          "src/pages/trainers/index.tsx"
+        ]
+      },
+      "useSchedules": {
+        "path": "src/hooks/api/useSchedules.ts",
+        "parameters": ["options"],
+        "returns": ["schedules", "loading", "error", "refetch", "mutate"],
+        "description": "Hook per gestire il recupero e la manipolazione delle programmazioni",
+        "usageExamples": [
+          "src/components/schedules/ScheduleList.tsx",
+          "src/pages/schedules/index.tsx"
+        ]
+      },
+      "useAttendance": {
+        "path": "src/hooks/api/useAttendance.ts",
+        "parameters": ["scheduleId", "sessionId", "options"],
+        "returns": ["attendance", "loading", "error", "updateAttendance", "refetch"],
+        "description": "Hook per gestire il recupero e la manipolazione delle presenze",
+        "usageExamples": [
+          "src/components/schedules/AttendanceSheet.tsx"
+        ]
+      }
+    },
+    "ui": {
+      "useForm": {
+        "path": "src/hooks/useForm.ts",
+        "parameters": ["initialValues", "validationSchema", "onSubmit"],
+        "returns": ["values", "errors", "touched", "handleChange", "handleBlur", "handleSubmit", "setFieldValue", "resetForm", "isSubmitting"],
+        "description": "Hook per gestire form con validazioni",
+        "usageExamples": [
+          "src/components/employees/EmployeeForm.tsx",
+          "src/components/courses/CourseForm.tsx"
+        ]
+      },
+      "useModal": {
+        "path": "src/hooks/useModal.ts",
+        "parameters": ["initialIsOpen"],
+        "returns": ["isOpen", "openModal", "closeModal", "toggleModal"],
+        "description": "Hook per gestire lo stato dei modali",
+        "usageExamples": [
+          "src/components/employees/EmployeeFormModal.tsx",
+          "src/components/courses/CourseDetailsModal.tsx"
+        ]
+      },
+      "useTable": {
+        "path": "src/hooks/useTable.ts",
+        "parameters": ["data", "columns", "options"],
+        "returns": ["tableState", "tableActions"],
+        "description": "Hook per gestire tabelle con sorting, filtering e paginazione",
+        "usageExamples": [
+          "src/components/employees/EmployeeTable.tsx",
+          "src/components/courses/CourseTable.tsx"
+        ]
+      },
+      "useConfirm": {
+        "path": "src/hooks/useConfirm.ts",
+        "parameters": ["options"],
+        "returns": ["confirm", "confirmState", "cancelConfirm"],
+        "description": "Hook per mostrare dialog di conferma",
+        "usageExamples": [
+          "src/components/employees/EmployeeActions.tsx",
+          "src/components/courses/CourseActions.tsx"
+        ]
+      },
+      "useFileUpload": {
+        "path": "src/hooks/useFileUpload.ts",
+        "parameters": ["options"],
+        "returns": ["upload", "isUploading", "progress", "error", "reset"],
+        "description": "Hook per gestire upload di file",
+        "usageExamples": [
+          "src/components/employees/EmployeePhotoUpload.tsx",
+          "src/components/documents/DocumentUpload.tsx"
+        ]
+      }
+    },
+    "state": {
+      "useFilterState": {
+        "path": "src/hooks/useFilterState.ts",
+        "parameters": ["initialFilters"],
+        "returns": ["filters", "setFilter", "resetFilters", "applyFilters"],
+        "description": "Hook per gestire stato dei filtri",
+        "usageExamples": [
+          "src/components/employees/EmployeeFilters.tsx",
+          "src/components/courses/CourseFilters.tsx"
+        ]
+      },
+      "useSelection": {
+        "path": "src/hooks/useSelection.ts",
+        "parameters": ["items", "key"],
+        "returns": ["selected", "isSelected", "toggleSelection", "selectAll", "clearSelection"],
+        "description": "Hook per gestire selezione multipla di elementi",
+        "usageExamples": [
+          "src/components/employees/EmployeeSelection.tsx",
+          "src/components/courses/CourseSelection.tsx"
+        ]
+      },
+      "useLocalStorage": {
+        "path": "src/hooks/useLocalStorage.ts",
+        "parameters": ["key", "initialValue"],
+        "returns": ["storedValue", "setValue", "removeValue"],
+        "description": "Hook per gestire dati in localStorage",
+        "usageExamples": [
+          "src/context/ThemeContext.tsx",
+          "src/components/settings/UserPreferences.tsx"
+        ]
+      }
+    },
+    "utils": {
+      "useDebounce": {
+        "path": "src/hooks/useDebounce.ts",
+        "parameters": ["value", "delay"],
+        "returns": ["debouncedValue"],
+        "description": "Hook per debounce di valori che cambiano frequentemente",
+        "usageExamples": [
+          "src/components/shared/SearchInput.tsx",
+          "src/components/filters/FilterInput.tsx"
+        ]
+      },
+      "useErrorHandler": {
+        "path": "src/hooks/useErrorHandler.ts",
+        "parameters": [],
+        "returns": ["handleError", "error", "clearError"],
+        "description": "Hook per gestione centralizzata degli errori",
+        "usageExamples": [
+          "src/services/api.ts",
+          "src/components/shared/ErrorBoundary.tsx"
+        ]
+      },
+      "useWindowSize": {
+        "path": "src/hooks/useWindowSize.ts",
+        "parameters": [],
+        "returns": ["width", "height", "isMobile", "isTablet", "isDesktop"],
+        "description": "Hook per monitorare dimensioni viewport",
+        "usageExamples": [
+          "src/components/layouts/ResponsiveLayout.tsx",
+          "src/components/ui/ResponsiveTable.tsx"
+        ]
+      },
+      "useClickOutside": {
+        "path": "src/hooks/useClickOutside.ts",
+        "parameters": ["handler"],
+        "returns": ["ref"],
+        "description": "Hook per rilevare click fuori da un elemento",
+        "usageExamples": [
+          "src/components/ui/Dropdown.tsx",
+          "src/components/ui/Popover.tsx"
+        ]
+      }
+    }
+  }
+} 

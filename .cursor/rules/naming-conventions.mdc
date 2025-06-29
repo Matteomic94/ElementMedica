@@ -1,0 +1,67 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Convenzioni di Nomenclatura
+
+Questo documento definisce le convenzioni di nomenclatura da seguire in tutto il progetto per garantire coerenza e leggibilità.
+
+## File e Directory
+
+- **Componenti React**: `PascalCase.tsx` (es. `Button.tsx`, `EmployeeForm.tsx`)
+- **Hook personalizzati**: `camelCase.ts` con prefisso `use` (es. `useEmployees.ts`)
+- **Servizi API**: `camelCase.ts` (es. `employeeService.ts`)
+- **Utility**: `camelCase.ts` (es. `dateUtils.ts`)
+- **Tipi e interfacce**: File in `camelCase.ts` (es. `types.ts`, `employees.ts`)
+- **Costanti**: `camelCase.ts` (es. `routes.ts`, `apiEndpoints.ts`)
+- **Test**: `*.test.ts` o `*.spec.ts` (es. `Button.test.tsx`)
+
+## Identificatori
+
+- **Componenti React**: `PascalCase` (es. `EmployeeList`, `Button`)
+- **Funzioni**: `camelCase` (es. `fetchData`, `formatDate`)
+- **Variabili e Proprietà**: `camelCase` (es. `firstName`, `isLoading`)
+- **Interfacce**: `PascalCase` con prefisso `I` o senza prefisso (es. `IEmployee` o `Employee`)
+- **Tipi**: `PascalCase` (es. `EmployeeResponse`, `ApiResult`)
+- **Enum**: `PascalCase` per il nome, `PascalCase` per i valori (es. `UserRole.Admin`)
+- **Costanti**: `UPPER_SNAKE_CASE` per costanti globali, `camelCase` per costanti locali
+- **Eventi**: `onNomeEvento` (es. `onClick`, `onSubmit`)
+- **Props**: `camelCase` (es. `firstName`, `onSubmit`)
+- **Stato React**: `camelCase` con verbi in forma attiva (es. `isLoading`, `hasError`)
+
+## Pattern per Nomi
+
+### Componenti
+
+- **Contenitori**: Suffisso `Container` (es. `EmployeeFormContainer`)
+- **Pagine**: Suffisso `Page` (es. `EmployeeListPage`)
+- **Form**: Suffisso `Form` (es. `EmployeeForm`)
+- **Liste**: Suffisso `List` o `Table` (es. `EmployeeList`, `EmployeeTable`)
+- **Item**: Suffisso `Item` o `Card` (es. `EmployeeItem`, `EmployeeCard`)
+- **Modal**: Suffisso `Modal` (es. `ConfirmDeleteModal`)
+
+### Hook
+
+- **Recupero dati**: Prefisso `use` + nome entità (es. `useEmployees`, `useCourses`) 
+- **Funzionalità**: Prefisso `use` + funzionalità (es. `useSorting`, `usePagination`)
+- **Stato condiviso**: Prefisso `use` + nome contesto (es. `useAuth`, `useToast`)
+
+### Servizi API
+
+- **Servizi generici**: Suffisso `Service` (es. `apiService`, `storageService`)
+- **Servizi di entità**: Nome dell'entità (es. `employees`, `courses`)
+- **Metodi di servizio**: Verbo + nome entità (es. `getEmployees`, `createCourse`)
+
+## Prefissi e Suffissi Semantici
+
+- Inizia i boolean con `is`, `has`, `should` (es. `isActive`, `hasPermission`)
+- Usa `on` per gestori di eventi (es. `onSubmit`, `onDelete`)
+- Usa `handle` per metodi che gestiscono eventi (es. `handleSubmit`, `handleDelete`)
+- Usa `get` per metodi che recuperano dati (es. `getEmployees`)
+- Usa `set` per metodi che impostano dati (es. `setConfiguration`)
+- Usa `compute` o `calculate` per operazioni computazionali (es. `computeTotalPrice`)
+- Usa `format` per metodi di formattazione (es. `formatDate`)
+- Usa `validate` per metodi di validazione (es. `validateEmail`)
+
+Seguire queste convenzioni rende il codice più prevedibile, leggibile e di facile manutenzione.

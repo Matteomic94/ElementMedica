@@ -1,0 +1,38 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Frontend Architecture
+
+The frontend is built with React, likely using Next.js given the folder structure.
+
+## Component Organization
+
+- `src/components/` - Reusable UI components organized by feature:
+  - `assessments/` - Components for assessment functionality
+  - `companies/` - Company management components
+  - `courses/` - Course-related components
+  - `dashboard/` - Dashboard visualization components
+  - `employees/` - Employee management components
+  - `layouts/` - Page layout components
+  - `schedules/` - Schedule management components
+  - `trainers/` - Trainer profile components
+  - `ui/` - Generic UI components
+  - `shared/` - Cross-cutting components
+
+## Page Structure
+
+- `src/pages/` - Route-based page components:
+  - `companies/` - Company management pages
+  - `courses/` - Course management pages
+  - `employees/` - Employee management pages
+  - `schedules/` - Schedule management pages
+  - `settings/` - Application settings
+  - `trainers/` - Trainer management pages
+
+## Data Flow
+
+- API communication is likely handled through `src/api/` and `src/services/`
+- Custom hooks in `src/hooks/` provide reusable logic
+- Type definitions in `src/types/` ensure type safety

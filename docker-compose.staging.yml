@@ -1,0 +1,201 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_staging
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/staging.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - frontend
+      - proxy
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      target: staging
+    container_name: frontend_staging
+    environment:
+      - NODE_ENV=staging
+      - VITE_API_URL=${STAGING_API_URL}
+      - VITE_DOCS_URL=${STAGING_DOCS_URL}
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  proxy:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.proxy
+    container_name: proxy_staging
+    environment:
+      - NODE_ENV=staging
+      - PORT=8888
+    ports:
+      - "8888:8888"
+    depends_on:
+      - api
+      - docs
+      - main
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.api
+    container_name: api_staging
+    environment:
+      - NODE_ENV=staging
+      - DATABASE_URL=${STAGING_DATABASE_URL}
+      - REDIS_URL=${STAGING_REDIS_URL}
+      - JWT_SECRET=${STAGING_JWT_SECRET}
+      - JWT_REFRESH_SECRET=${STAGING_JWT_REFRESH_SECRET}
+      - GOOGLE_CLIENT_ID=${STAGING_GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${STAGING_GOOGLE_CLIENT_SECRET}
+    ports:
+      - "4001:4001"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs/api:/app/logs
+      - ./uploads:/app/uploads
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  docs:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.docs
+    container_name: docs_staging
+    environment:
+      - NODE_ENV=staging
+      - GOOGLE_CLIENT_ID=${STAGING_GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${STAGING_GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CREDENTIALS=${STAGING_GOOGLE_CREDENTIALS}
+    ports:
+      - "4002:4002"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./logs/docs:/app/logs
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  main:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.main
+    container_name: main_staging
+    environment:
+      - NODE_ENV=staging
+      - DATABASE_URL=${STAGING_DATABASE_URL}
+      - REDIS_URL=${STAGING_REDIS_URL}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ./logs/main:/app/logs
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres_staging
+    environment:
+      - POSTGRES_DB=${STAGING_DB_NAME}
+      - POSTGRES_USER=${STAGING_DB_USER}
+      - POSTGRES_PASSWORD=${STAGING_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/setup_db.sql:/docker-entrypoint-initdb.d/setup_db.sql
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_staging
+    command: redis-server --appendonly yes --requirepass ${STAGING_REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - app_network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app_network:
+    driver: bridge

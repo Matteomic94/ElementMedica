@@ -1,0 +1,156 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Indice della Documentazione
+
+Questo documento serve come punto di ingresso centralizzato per tutta la documentazione del progetto. Utilizza questo indice per navigare rapidamente verso le informazioni più rilevanti per il tuo compito attuale.
+
+## 🚀 Guida Rapida
+
+Se sei un assistente AI che lavora su questo progetto per la prima volta, inizia leggendo:
+
+1. [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc) - **PROCEDURA OBBLIGATORIA** per assistenti AI
+2. [Execution Flow](mdc:execution-flow.mdc) - **FLUSSO OBBLIGATORIO** da seguire durante l'analisi
+3. [AI Assistant Guide](mdc:ai-assistant-guide.mdc) - Guida generale per gli assistenti AI
+4. [Project Structure](mdc:project-structure.mdc) - Panoramica della struttura del progetto
+5. [Entity Relationships](mdc:entity-relationships.mdc) - Relazioni tra le entità del sistema
+
+## 📚 Documentazione Completa
+
+### Processi e Protocolli per Assistenti AI
+- [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc) - **Protocollo vincolante per assistenti AI**
+- [Execution Flow](mdc:execution-flow.mdc) - **Flusso di esecuzione step-by-step**
+- [Name Recognition](mdc:name-recognition.mdc) - Tecniche per identificare componenti esistenti
+- [Verification Checklist](mdc:verification-checklist.mdc) - Checklist di verifica pre-commit
+- [AI Assistant Guide](mdc:ai-assistant-guide.mdc) - Guida generale per assistenti AI
+- [Anti-Patterns](mdc:anti-patterns.mdc) - Pattern e pratiche da evitare
+
+### Architettura
+- [Project Structure](mdc:project-structure.mdc) - Struttura generale del progetto
+- [Frontend Architecture](mdc:frontend-architecture.mdc) - Architettura del frontend
+- [Backend Architecture](mdc:backend-architecture.mdc) - Architettura del backend
+- [Database Schema](mdc:database-schema.mdc) - Schema del database
+
+### Standard e Convenzioni
+- [Naming Conventions](mdc:naming-conventions.mdc) - Convenzioni di nomenclatura
+- [Common Patterns](mdc:common-patterns.mdc) - Pattern di codice comuni
+- [API Guidelines](mdc:api-guidelines.mdc) - Linee guida per le API
+- [Development Guidelines](mdc:development-guidelines.mdc) - Linee guida generali di sviluppo
+
+### Considerazioni Importanti
+- [Critical Sections](mdc:critical-sections.mdc) - Sezioni critiche del codice
+- [Entity Relationships](mdc:entity-relationships.mdc) - Relazioni tra le entità
+- [Type Definitions](mdc:type-definitions.mdc) - Definizioni dei tipi principali
+- [Multilingual Aspects](mdc:multilingual-aspects.mdc) - Aspetti multilingue
+- [Cursor Rules](mdc:cursorrules.mdc) - Regole ferree per lo sviluppo
+
+### Guide e Template
+- [Glossary](mdc:glossary.mdc) - Glossario dei termini specifici del dominio
+- [Templates](mdc:templates.mdc) - Template per nuovi componenti e file
+
+## 🔍 Strategie di Analisi per Assistenti AI
+
+### Prima di Iniziare Qualsiasi Sviluppo
+
+1. [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc) - **LEGGI PRIMA DI TUTTO**
+2. [Execution Flow](mdc:execution-flow.mdc) - **SEGUI QUESTO PROCESSO STEP-BY-STEP**
+3. [Name Recognition](mdc:name-recognition.mdc) - Come identificare componenti esistenti
+4. [Anti-Patterns](mdc:anti-patterns.mdc) - Pattern e approcci da evitare
+
+### Per Analizzare il Progetto
+
+1. [Project Structure](mdc:project-structure.mdc) - Comprensione generale
+2. [Entity Relationships](mdc:entity-relationships.mdc) - Modello dati e relazioni
+3. [Common Patterns](mdc:common-patterns.mdc) - Pattern di implementazione ricorrenti
+
+### Per Implementare Nuove Funzionalità
+
+1. [Execution Flow](mdc:execution-flow.mdc) - **Segui ogni fase del processo**
+2. [Name Recognition](mdc:name-recognition.mdc) - Tecniche per identificare componenti esistenti
+3. [Templates](mdc:templates.mdc) - Template standardizzati per nuovi file
+4. [Development Guidelines](mdc:development-guidelines.mdc) - Linee guida di implementazione
+5. [Verification Checklist](mdc:verification-checklist.mdc) - Lista di controllo finale
+
+## 🧠 Framework Decisionale
+
+### Quando stai creando o modificando...
+
+#### Componenti Frontend
+1. [Execution Flow](mdc:execution-flow.mdc) - Segui il flusso di esecuzione
+2. [Name Recognition](mdc:name-recognition.mdc) - Identifica componenti esistenti
+3. [Naming Conventions](mdc:naming-conventions.mdc) - Segui le convenzioni di nomenclatura
+4. [Common Patterns](mdc:common-patterns.mdc) - Applica pattern comuni
+5. [Frontend Architecture](mdc:frontend-architecture.mdc) - Rispetta l'architettura frontend
+6. [Anti-Patterns](mdc:anti-patterns.mdc) - Evita gli anti-pattern
+
+#### Servizi API
+1. [Execution Flow](mdc:execution-flow.mdc) - Segui il flusso di esecuzione
+2. [API Guidelines](mdc:api-guidelines.mdc) - Segui le linee guida API
+3. [Common Patterns](mdc:common-patterns.mdc) - Usa il pattern factory
+4. [Backend Architecture](mdc:backend-architecture.mdc) - Rispetta l'architettura backend
+5. [Anti-Patterns](mdc:anti-patterns.mdc) - Evita gli anti-pattern dei servizi
+
+#### Modello Dati
+1. [Execution Flow](mdc:execution-flow.mdc) - Segui il flusso di esecuzione
+2. [Entity Relationships](mdc:entity-relationships.mdc) - Comprendi le relazioni
+3. [Type Definitions](mdc:type-definitions.mdc) - Usa definizioni di tipo appropriate
+4. [Database Schema](mdc:database-schema.mdc) - Rispetta lo schema del database
+5. [Anti-Patterns](mdc:anti-patterns.mdc) - Evita gli anti-pattern del database
+
+#### Nuovi Hook
+1. [Execution Flow](mdc:execution-flow.mdc) - Segui il flusso di esecuzione
+2. [Name Recognition](mdc:name-recognition.mdc) - Cerca hook esistenti
+3. [Common Patterns](mdc:common-patterns.mdc) - Segui i pattern esistenti
+4. [Naming Conventions](mdc:naming-conventions.mdc) - Usa convenzioni di nomenclatura
+5. [Anti-Patterns](mdc:anti-patterns.mdc) - Evita gli anti-pattern degli hook
+
+## 🛑 Controlli Pre-Implementazione
+
+Prima di procedere con qualsiasi implementazione, assicurati di:
+
+1. Aver seguito ogni fase del [Execution Flow](mdc:execution-flow.mdc)
+2. Aver compreso l'architettura esistente consultando i documenti pertinenti
+3. Aver identificato pattern simili già presenti nel progetto usando [Name Recognition](mdc:name-recognition.mdc)
+4. Verificare se esistono componenti o hook riutilizzabili
+5. Controllare la sezione [Critical Sections](mdc:critical-sections.mdc) per eventuali considerazioni importanti
+6. Consultare [Anti-Patterns](mdc:anti-patterns.mdc) per evitare approcci problematici
+
+## 💡 Workflow Ottimale per Assistenti AI
+
+1. **Comprensione** - Leggi [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc)
+2. **Processo** - Segui rigorosamente [Execution Flow](mdc:execution-flow.mdc)
+3. **Analisi** - Utilizza tecniche in [Name Recognition](mdc:name-recognition.mdc) per analizzare il codice esistente
+4. **Pianificazione** - Delinea gli step necessari seguendo [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc)
+5. **Implementazione** - Segui i pattern documentati in [Templates](mdc:templates.mdc) e [Common Patterns](mdc:common-patterns.mdc)
+6. **Verifica** - Usa [Verification Checklist](mdc:verification-checklist.mdc) per verificare la tua implementazione
+
+## 📋 Checklist di Verifica Rapida
+
+- [ ] Ho seguito il [AI Instruction Protocol](mdc:ai-instruction-protocol.mdc)?
+- [ ] Ho seguito ogni fase del [Execution Flow](mdc:execution-flow.mdc)?
+- [ ] Ho utilizzato [Name Recognition](mdc:name-recognition.mdc) per identificare componenti esistenti?
+- [ ] L'implementazione segue le convenzioni di nomenclatura?
+- [ ] Sono stati utilizzati i pattern appropriati?
+- [ ] Ho evitato gli [Anti-Patterns](mdc:anti-patterns.mdc)?
+- [ ] Le relazioni tra entità sono state considerate?
+- [ ] Il codice è ben documentato con JSDoc?
+- [ ] Sono state considerate le sezioni critiche?
+- [ ] Il codice è coerente con lo stile esistente?
+- [ ] Sono stati definiti tipi TypeScript appropriati?
+
+## 📝 Note sulla Manutenzione della Documentazione
+
+Questa documentazione dovrebbe essere aggiornata ogni volta che:
+1. Vengono implementati nuovi pattern o convenzioni
+2. Si modificano parti critiche dell'architettura
+3. Si introducono nuove entità o relazioni
+4. Si cambiano le regole o le linee guida di sviluppo
+
+## 🌍 Risorse Esterne Rilevanti
+
+- [README.md](mdc:../../README.md) - Readme principale del progetto
+- [API_MIGRATION.md](mdc:../../API_MIGRATION.md) - Guida alla migrazione delle API
+- [OPTIMIZATION_COMPLETE.md](mdc:../../OPTIMIZATION_COMPLETE.md) - Ottimizzazioni completate
+- [src/services/README.md](mdc:../../src/services/README.md) - Documentazione sui servizi API

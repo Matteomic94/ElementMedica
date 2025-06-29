@@ -1,0 +1,357 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2023-06-08T15:45:00Z",
+  "services": {
+    "api": {
+      "employeeService": {
+        "path": "src/services/employeeService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getEmployees", 
+            "method": "GET",
+            "url": "/api/employees",
+            "parameters": ["filters"],
+            "description": "Recupera lista dipendenti con possibilità di filtri"
+          },
+          { 
+            "name": "getEmployeeById", 
+            "method": "GET",
+            "url": "/api/employees/:id",
+            "parameters": ["id"],
+            "description": "Recupera dettagli di un dipendente specifico"
+          },
+          { 
+            "name": "createEmployee", 
+            "method": "POST",
+            "url": "/api/employees",
+            "parameters": ["employeeData"],
+            "description": "Crea un nuovo dipendente"
+          },
+          { 
+            "name": "updateEmployee", 
+            "method": "PUT",
+            "url": "/api/employees/:id",
+            "parameters": ["id", "employeeData"],
+            "description": "Aggiorna un dipendente esistente"
+          },
+          { 
+            "name": "deleteEmployee", 
+            "method": "DELETE",
+            "url": "/api/employees/:id",
+            "parameters": ["id"],
+            "description": "Elimina un dipendente"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useEmployees.ts",
+          "src/components/employees/EmployeeActions.tsx"
+        ]
+      },
+      "courseService": {
+        "path": "src/services/courseService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getCourses", 
+            "method": "GET",
+            "url": "/api/courses",
+            "parameters": ["filters"],
+            "description": "Recupera lista corsi con possibilità di filtri"
+          },
+          { 
+            "name": "getCourseById", 
+            "method": "GET",
+            "url": "/api/courses/:id",
+            "parameters": ["id"],
+            "description": "Recupera dettagli di un corso specifico"
+          },
+          { 
+            "name": "createCourse", 
+            "method": "POST",
+            "url": "/api/courses",
+            "parameters": ["courseData"],
+            "description": "Crea un nuovo corso"
+          },
+          { 
+            "name": "updateCourse", 
+            "method": "PUT",
+            "url": "/api/courses/:id",
+            "parameters": ["id", "courseData"],
+            "description": "Aggiorna un corso esistente"
+          },
+          { 
+            "name": "deleteCourse", 
+            "method": "DELETE",
+            "url": "/api/courses/:id",
+            "parameters": ["id"],
+            "description": "Elimina un corso"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useCourses.ts",
+          "src/components/courses/CourseActions.tsx"
+        ]
+      },
+      "companyService": {
+        "path": "src/services/companyService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getCompanies", 
+            "method": "GET",
+            "url": "/api/companies",
+            "parameters": ["filters"],
+            "description": "Recupera lista aziende con possibilità di filtri"
+          },
+          { 
+            "name": "getCompanyById", 
+            "method": "GET",
+            "url": "/api/companies/:id",
+            "parameters": ["id"],
+            "description": "Recupera dettagli di un'azienda specifica"
+          },
+          { 
+            "name": "createCompany", 
+            "method": "POST",
+            "url": "/api/companies",
+            "parameters": ["companyData"],
+            "description": "Crea una nuova azienda"
+          },
+          { 
+            "name": "updateCompany", 
+            "method": "PUT",
+            "url": "/api/companies/:id",
+            "parameters": ["id", "companyData"],
+            "description": "Aggiorna un'azienda esistente"
+          },
+          { 
+            "name": "deleteCompany", 
+            "method": "DELETE",
+            "url": "/api/companies/:id",
+            "parameters": ["id"],
+            "description": "Elimina un'azienda"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useCompanies.ts",
+          "src/components/companies/CompanyActions.tsx"
+        ]
+      },
+      "trainerService": {
+        "path": "src/services/trainerService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getTrainers", 
+            "method": "GET",
+            "url": "/api/trainers",
+            "parameters": ["filters"],
+            "description": "Recupera lista trainer con possibilità di filtri"
+          },
+          { 
+            "name": "getTrainerById", 
+            "method": "GET",
+            "url": "/api/trainers/:id",
+            "parameters": ["id"],
+            "description": "Recupera dettagli di un trainer specifico"
+          },
+          { 
+            "name": "createTrainer", 
+            "method": "POST",
+            "url": "/api/trainers",
+            "parameters": ["trainerData"],
+            "description": "Crea un nuovo trainer"
+          },
+          { 
+            "name": "updateTrainer", 
+            "method": "PUT",
+            "url": "/api/trainers/:id",
+            "parameters": ["id", "trainerData"],
+            "description": "Aggiorna un trainer esistente"
+          },
+          { 
+            "name": "deleteTrainer", 
+            "method": "DELETE",
+            "url": "/api/trainers/:id",
+            "parameters": ["id"],
+            "description": "Elimina un trainer"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useTrainers.ts",
+          "src/components/trainers/TrainerActions.tsx"
+        ]
+      },
+      "scheduleService": {
+        "path": "src/services/scheduleService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getSchedules", 
+            "method": "GET",
+            "url": "/api/schedules",
+            "parameters": ["filters"],
+            "description": "Recupera lista programmazioni con possibilità di filtri"
+          },
+          { 
+            "name": "getScheduleById", 
+            "method": "GET",
+            "url": "/api/schedules/:id",
+            "parameters": ["id"],
+            "description": "Recupera dettagli di una programmazione specifica"
+          },
+          { 
+            "name": "createSchedule", 
+            "method": "POST",
+            "url": "/api/schedules",
+            "parameters": ["scheduleData"],
+            "description": "Crea una nuova programmazione"
+          },
+          { 
+            "name": "updateSchedule", 
+            "method": "PUT",
+            "url": "/api/schedules/:id",
+            "parameters": ["id", "scheduleData"],
+            "description": "Aggiorna una programmazione esistente"
+          },
+          { 
+            "name": "deleteSchedule", 
+            "method": "DELETE",
+            "url": "/api/schedules/:id",
+            "parameters": ["id"],
+            "description": "Elimina una programmazione"
+          },
+          { 
+            "name": "getScheduleSessions", 
+            "method": "GET",
+            "url": "/api/schedules/:id/sessions",
+            "parameters": ["id"],
+            "description": "Recupera sessioni di una programmazione"
+          },
+          { 
+            "name": "createScheduleSession", 
+            "method": "POST",
+            "url": "/api/schedules/:id/sessions",
+            "parameters": ["id", "sessionData"],
+            "description": "Crea una nuova sessione per una programmazione"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useSchedules.ts",
+          "src/components/schedules/ScheduleActions.tsx"
+        ]
+      },
+      "attendanceService": {
+        "path": "src/services/attendanceService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "getAttendanceBySession", 
+            "method": "GET",
+            "url": "/api/schedules/:scheduleId/sessions/:sessionId/attendance",
+            "parameters": ["scheduleId", "sessionId"],
+            "description": "Recupera presenze per una sessione"
+          },
+          { 
+            "name": "updateAttendance", 
+            "method": "PUT",
+            "url": "/api/schedules/:scheduleId/sessions/:sessionId/attendance",
+            "parameters": ["scheduleId", "sessionId", "attendanceData"],
+            "description": "Aggiorna presenze per una sessione"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/hooks/api/useAttendance.ts",
+          "src/components/schedules/AttendanceSheet.tsx"
+        ]
+      },
+      "documentService": {
+        "path": "src/services/documentService.ts",
+        "factoryPattern": true,
+        "endpoints": [
+          { 
+            "name": "generateCertificate", 
+            "method": "POST",
+            "url": "/api/documents/certificates",
+            "parameters": ["certificateData"],
+            "description": "Genera un certificato per un partecipante"
+          },
+          { 
+            "name": "getTemplates", 
+            "method": "GET",
+            "url": "/api/documents/templates",
+            "parameters": ["type"],
+            "description": "Recupera template documenti per tipo"
+          },
+          { 
+            "name": "uploadTemplate", 
+            "method": "POST",
+            "url": "/api/documents/templates",
+            "parameters": ["templateFile", "templateData"],
+            "description": "Carica un nuovo template"
+          }
+        ],
+        "errorHandling": "useErrorHandler",
+        "usageExamples": [
+          "src/components/documents/CertificateGenerator.tsx",
+          "src/pages/settings/templates.tsx"
+        ]
+      }
+    },
+    "utils": {
+      "serviceFactory": {
+        "path": "src/services/serviceFactory.ts",
+        "description": "Factory pattern per creare servizi API con configurazione consistente",
+        "usageExamples": [
+          "src/services/employeeService.ts",
+          "src/services/courseService.ts"
+        ]
+      },
+      "apiClient": {
+        "path": "src/services/apiClient.ts",
+        "description": "Client HTTP configurato per comunicare con il backend",
+        "usageExamples": [
+          "src/services/serviceFactory.ts"
+        ]
+      },
+      "errorHandler": {
+        "path": "src/services/errorHandler.ts",
+        "description": "Gestore errori centralizzato per le chiamate API",
+        "usageExamples": [
+          "src/services/apiClient.ts"
+        ]
+      }
+    },
+    "domain": {
+      "exportService": {
+        "path": "src/services/exportService.ts",
+        "description": "Servizio per esportazione dati in vari formati (PDF, Excel, CSV)",
+        "usageExamples": [
+          "src/components/employees/EmployeeExport.tsx",
+          "src/components/courses/CourseExport.tsx"
+        ]
+      },
+      "reportService": {
+        "path": "src/services/reportService.ts",
+        "description": "Servizio per generazione report e statistiche",
+        "usageExamples": [
+          "src/components/dashboard/ReportGenerator.tsx"
+        ]
+      },
+      "notificationService": {
+        "path": "src/services/notificationService.ts",
+        "description": "Servizio per gestione notifiche utente",
+        "usageExamples": [
+          "src/components/shared/Notifications.tsx"
+        ]
+      }
+    }
+  }
+} 

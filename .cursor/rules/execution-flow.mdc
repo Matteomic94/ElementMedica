@@ -1,0 +1,346 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Flusso di Esecuzione per Assistenti AI
+
+Questo documento definisce la sequenza specifica di passi che un assistente AI deve seguire quando analizza un problema e propone una soluzione. Seguendo questo flusso standardizzato, si garantisce coerenza negli approcci e si minimizzano gli errori.
+
+## 🔄 Ciclo di Esecuzione Completo
+
+```
+┌─────────────────────┐
+│                     │
+│  1. COMPRENSIONE    │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  2. RICOGNIZIONE    │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  3. ANALISI         │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  4. PIANIFICAZIONE  │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  5. IMPLEMENTAZIONE │
+│                     │
+└──────────┬──────────┘
+           ▼
+┌─────────────────────┐
+│                     │
+│  6. VERIFICA        │
+│                     │
+└─────────────────────┘
+```
+
+## 1️⃣ FASE DI COMPRENSIONE
+
+**Obiettivo**: Comprendere esattamente il problema o l'esigenza dell'utente.
+
+### Passi Obbligatori
+
+1. **Identifica il tipo di richiesta**:
+   - Correzione bug?
+   - Nuova funzionalità?
+   - Miglioramento?
+   - Chiarimento?
+
+2. **Definisci l'ambito del problema**:
+   - Quali parti del sistema sono coinvolte?
+   - Quali entità/relazioni sono interessate?
+   - Quali utenti/casi d'uso sono impattati?
+
+3. **Valuta la criticità**:
+   - È un problema bloccante?
+   - Influisce su funzionalità critiche?
+   - Ha implicazioni per la sicurezza o l'integrità dei dati?
+
+4. **Chiarisci eventuali ambiguità**:
+   - Se la richiesta non è chiara, chiedi precisazioni
+   - Assicurati di comprendere le aspettative dell'utente
+
+### Output della Fase
+
+- **Definizione chiara del problema**: "Il problema consiste in... e influisce su..."
+- **Ambito definito**: "Le componenti coinvolte sono..."
+- **Criticità identificata**: "Si tratta di un problema di priorità..."
+
+## 2️⃣ FASE DI RICOGNIZIONE
+
+**Obiettivo**: Identificare tutte le componenti rilevanti esistenti nel sistema.
+
+### Passi Obbligatori
+
+1. **Esplora la struttura delle directory**:
+   - Identifica i file/directory pertinenti al problema
+   - Mappa la struttura interessata
+
+2. **Identifica componenti esistenti**:
+   - Consulta [Name Recognition](mdc:name-recognition.mdc)
+   - Cerca componenti, hook, servizi esistenti relativi al problema
+   - Individua implementazioni simili in altre parti del sistema
+
+3. **Analizza relazioni e dipendenze**:
+   - Identifica relazioni tra le entità coinvolte
+   - Controlla le dipendenze tra i componenti
+
+4. **Riconosci pattern esistenti**:
+   - Identifica pattern di implementazione
+   - Osserva la gestione di casi simili nel sistema
+
+### Output della Fase
+
+- **Mappa dei file rilevanti**: "I file coinvolti sono..."
+- **Componenti esistenti identificati**: "Esistono già i seguenti componenti pertinenti..."
+- **Pattern riconosciuti**: "Il pattern utilizzato per casi simili è..."
+
+## 3️⃣ FASE DI ANALISI
+
+**Obiettivo**: Analizzare a fondo il problema e valutare le possibili soluzioni.
+
+### Passi Obbligatori
+
+1. **Analizza la causa principale**:
+   - Identifica la causa radice del problema
+   - Verifica se esistono segnalazioni simili in altre parti del sistema
+
+2. **Esamina il codice esistente**:
+   - Analizza l'implementazione attuale
+   - Identifica potenziali punti deboli o bug
+
+3. **Considera vincoli e limitazioni**:
+   - Architettura esistente
+   - Convenzioni di nomenclatura
+   - Relazioni tra entità
+   - Requisiti di prestazioni
+
+4. **Genera opzioni di soluzione**:
+   - Identifica 2-3 approcci possibili
+   - Considera soluzioni minimali vs rifattorizzazioni più ampie
+
+5. **Valuta pro e contro**:
+   - Per ogni soluzione, valuta:
+     - Complessità
+     - Impatto
+     - Compatibilità con struttura esistente
+     - Sostenibilità a lungo termine
+
+### Output della Fase
+
+- **Causa identificata**: "Il problema è causato da..."
+- **Opzioni di soluzione**: "Le possibili soluzioni sono..."
+- **Analisi pro/contro**: "Ciascuna soluzione presenta i seguenti vantaggi/svantaggi..."
+
+## 4️⃣ FASE DI PIANIFICAZIONE
+
+**Obiettivo**: Pianificare in dettaglio l'implementazione della soluzione scelta.
+
+### Passi Obbligatori
+
+1. **Seleziona la soluzione ottimale**:
+   - Scegli l'approccio più adatto considerando:
+     - Compatibilità con l'architettura esistente
+     - Minimo impatto (principio di modifica chirurgica)
+     - Efficacia nel risolvere il problema
+     - Sostenibilità a lungo termine
+
+2. **Identifica i file da modificare**:
+   - Elenca esattamente quali file devono essere modificati
+   - Valuta se è necessario creare nuovi file (evitare se possibile)
+
+3. **Pianifica l'implementazione in step**:
+   - Dividi la soluzione in passaggi logici
+   - Definisci l'ordine di esecuzione
+
+4. **Prevedi potenziali problemi**:
+   - Identifica possibili effetti collaterali
+   - Considera casi limite e gestione errori
+
+### Output della Fase
+
+- **Soluzione selezionata**: "La soluzione ottimale è..."
+- **Elenco modifiche**: "I seguenti file verranno modificati: ..."
+- **Piano di implementazione**: "L'implementazione seguirà questi passi: ..."
+- **Considerazioni di rischio**: "Saranno gestiti i seguenti rischi: ..."
+
+## 5️⃣ FASE DI IMPLEMENTAZIONE
+
+**Obiettivo**: Implementare la soluzione seguendo il piano definito.
+
+### Passi Obbligatori
+
+1. **Segui esattamente il piano definito**:
+   - Attieniti ai passi pianificati
+   - Non introdurre modifiche non previste
+
+2. **Modifica chirurgicamente**:
+   - Limita le modifiche all'essenziale
+   - Non alterare comportamenti esistenti funzionanti
+
+3. **Segui convenzioni e pattern**:
+   - Mantieni coerenza con il codice esistente
+   - Segui convenzioni di nomenclatura
+   - Utilizza pattern consolidati
+
+4. **Documenta adeguatamente**:
+   - Aggiungi commenti JSDoc
+   - Spiega parti complesse con commenti inline
+   - Aggiorna documentazione se necessario
+
+5. **Gestisci errori e casi limite**:
+   - Implementa gestione errori robusta
+   - Considera tutti i casi limite
+   - Usa l'hook `useErrorHandler` per gestire errori API
+
+### Output della Fase
+
+- **Codice implementato**: Le modifiche effettive al codice
+- **Documentazione aggiornata**: Commenti JSDoc e spiegazioni
+
+## 6️⃣ FASE DI VERIFICA
+
+**Obiettivo**: Verificare che la soluzione implementata risolva il problema e non ne introduca di nuovi.
+
+### Passi Obbligatori
+
+1. **Verifica tramite checklist**:
+   - Consulta [Verification Checklist](mdc:verification-checklist.mdc)
+   - Valida punto per punto
+
+2. **Controlla anti-pattern**:
+   - Consulta [Anti-Patterns](mdc:anti-patterns.mdc)
+   - Assicurati di non aver introdotto anti-pattern
+
+3. **Verifica completezza**:
+   - La soluzione risolve completamente il problema?
+   - Sono stati considerati tutti i casi d'uso?
+
+4. **Controlla effetti collaterali**:
+   - La soluzione impatta altri componenti?
+   - Sono stati gestiti tutti gli effetti secondari?
+
+5. **Valida coerenza architetturale**:
+   - La soluzione rispetta l'architettura del sistema?
+   - Sono stati seguiti i pattern esistenti?
+
+### Output della Fase
+
+- **Risultato della verifica**: "La soluzione è stata verificata con..."
+- **Conferma di completezza**: "La soluzione risolve il problema perché..."
+- **Validazione architetturale**: "La soluzione è coerente con l'architettura perché..."
+
+## 📊 Esempio di Flusso Completo
+
+### Scenario: Bug nella visualizzazione dei dettagli di un dipendente
+
+#### 1. COMPRENSIONE
+- **Tipo di richiesta**: Correzione bug
+- **Ambito**: Visualizzazione dettagli dipendente
+- **Criticità**: Media (non blocca l'uso del sistema ma limita la funzionalità)
+- **Definizione del problema**: "I dettagli del dipendente non vengono visualizzati quando l'utente clicca su un elemento nella lista dipendenti"
+
+#### 2. RICOGNIZIONE
+- **File coinvolti**:
+  - `src/components/employees/EmployeeList.tsx`
+  - `src/components/employees/EmployeeDetails.tsx`
+  - `src/services/employees.ts`
+- **Componenti esistenti**:
+  - Lista dipendenti
+  - Componente dettagli dipendente
+  - Servizio API dipendenti
+- **Pattern riconosciuti**:
+  - Pattern container/presentational per gestione stato
+  - Factory pattern per i servizi API
+
+#### 3. ANALISI
+- **Causa principale**: Il componente EmployeeDetails non riceve correttamente l'ID del dipendente selezionato
+- **Opzioni di soluzione**:
+  1. Fix minimo: Correggere il passaggio dell'ID nel componente EmployeeList
+  2. Soluzione più robusta: Implementare gestione stato con Context API
+- **Analisi pro/contro**:
+  - Fix minimo: Semplice, non invasivo, ma potrebbe non coprire tutti i casi
+  - Soluzione Context: Più robusta ma richiede più modifiche
+
+#### 4. PIANIFICAZIONE
+- **Soluzione selezionata**: Fix minimo (approccio chirurgico)
+- **File da modificare**: `src/components/employees/EmployeeList.tsx`
+- **Piano implementazione**:
+  1. Identificare dove viene gestito il click sull'elemento della lista
+  2. Correggere il passaggio dell'ID
+  3. Verificare la propagazione corretta dell'evento
+
+#### 5. IMPLEMENTAZIONE
+```jsx
+// Modifica in EmployeeList.tsx
+// Da:
+const handleEmployeeClick = (employee) => {
+  onEmployeeSelect(employee);
+};
+
+// A:
+const handleEmployeeClick = (employee) => {
+  onEmployeeSelect(employee.id); // Passa l'ID invece dell'oggetto completo
+};
+```
+
+#### 6. VERIFICA
+- **Checklist**: Tutte le voci verificate
+- **Completezza**: La modifica risolve il problema passando correttamente l'ID
+- **Effetti collaterali**: Nessuno identificato
+- **Coerenza architetturale**: Mantiene lo stesso pattern esistente
+
+## 🚦 Regole di Interruzione del Flusso
+
+Interrompi il flusso e chiedi chiarimenti all'utente se:
+
+1. **Comprensione incompleta**:
+   - La richiesta è ambigua
+   - Mancano informazioni essenziali per procedere
+
+2. **Conflitto con regole critiche**:
+   - La soluzione richiederebbe violazione di regole architetturali
+   - Sarebbe necessario modificare server o porte
+
+3. **Rischio elevato**:
+   - La modifica potrebbe avere impatti profondi non valutabili
+   - La soluzione coinvolge aree critiche del sistema
+
+4. **Alternativa strategica**:
+   - Hai identificato un approccio radicalmente diverso che potrebbe essere migliore
+   - Esistono multiple soluzioni con compromessi significativi
+
+## 🧠 Considerazioni sulla Risoluzione dei Problemi
+
+### 1. Preferisci sempre modifiche minimali
+
+Segui il principio di "chirurgia minima": modifica solo ciò che è necessario per risolvere il problema, evitando cambiamenti più ampi di quanto richiesto.
+
+### 2. Evita creazione non necessaria di file
+
+Verifica sempre se è possibile risolvere il problema estendendo componenti esistenti prima di creare nuovi file.
+
+### 3. Riutilizza pattern esistenti
+
+Se un pattern è già implementato nel sistema (es. per gestione errori, CRUD, ecc.), utilizzalo anche nella tua soluzione.
+
+### 4. Mantieni coerenza di nomenclatura e stile
+
+Assicurati che le tue modifiche seguano le stesse convenzioni utilizzate nel resto del progetto.
+
+### 5. Rispondi con la massima specificità possibile
+
+Quando proponi una soluzione, sii preciso nei dettagli implementativi e nelle giustificazioni.

@@ -1,0 +1,242 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Relazioni tra Entità
+
+Questo documento fornisce una panoramica completa delle relazioni tra le entità nel database dell'applicazione, includendo diagrammi e dettagli sulle associazioni.
+
+## Panoramica delle Entità Principali
+
+```
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│             │       │             │       │             │
+│   Company   │───┐   │    Course   │       │   Trainer   │
+│  (Azienda)  │   │   │   (Corso)   │       │ (Formatore) │
+│             │   │   │             │       │             │
+└─────────────┘   │   └──────┬──────┘       └──────┬──────┘
+        │         │          │                     │
+        │         │          │                     │
+        ▼         │          ▼                     │
+┌─────────────┐   │   ┌─────────────┐              │
+│             │   │   │             │              │
+│  Department │   │   │   Schedule  │◄─────────────┘
+│(Dipartimento)│   │   │(Pianificazione)
+│             │   │   │             │
+└──────┬──────┘   │   └──────┬──────┘
+        │         │          │
+        │         │          │
+        ▼         │          ▼
+┌─────────────┐   │   ┌─────────────┐       ┌─────────────┐
+│             │   │   │             │       │             │
+│   Employee  │◄──┘   │   Session   │       │  Attestato  │
+│ (Dipendente)│◄──────┼──►(Sessione) │       │(Certificato)│
+│             │       │             │       │             │
+└─────────────┘       └─────────────┘       └──────▲──────┘
+                                                   │
+                                                   │
+                                            ┌──────┴──────┐
+                                            │             │
+                                            │  Template   │
+                                            │             │
+                                            └─────────────┘
+```
+
+## Relazioni Dettagliate
+
+### 1. Company (Azienda) → Departments (Dipartimenti)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un'azienda può avere più dipartimenti, ma ogni dipartimento appartiene a una sola azienda.  
+**Campi chiave**:
+- `departments.companyId` → riferimento a `companies.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di un'azienda comporta la cancellazione di tutti i suoi dipartimenti.
+
+### 2. Company (Azienda) → Employees (Dipendenti)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un'azienda può avere molti dipendenti, ma ogni dipendente appartiene a una sola azienda.  
+**Campi chiave**:
+- `employees.companyId` → riferimento a `companies.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di un'azienda comporta la cancellazione di tutti i suoi dipendenti.
+
+### 3. Department (Dipartimento) → Employees (Dipendenti)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un dipartimento può avere molti dipendenti, ma ogni dipendente appartiene a un solo dipartimento.  
+**Campi chiave**:
+- `employees.departmentId` → riferimento a `departments.id`
+
+**Comportamento di eliminazione**: Restrict/Set Null  
+**Note**: L'eliminazione di un dipartimento può comportare l'impostazione di `null` per il campo `departmentId` dei dipendenti associati.
+
+### 4. Course (Corso) → Schedules (Pianificazioni)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un corso può avere molte pianificazioni, ma ogni pianificazione è associata a un solo corso.  
+**Campi chiave**:
+- `schedules.courseId` → riferimento a `courses.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di un corso comporta la cancellazione di tutte le pianificazioni associate.
+
+### 5. Trainer (Formatore) → Schedules (Pianificazioni)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un formatore può condurre molte pianificazioni, ma ogni pianificazione è condotta da un solo formatore.  
+**Campi chiave**:
+- `schedules.trainerId` → riferimento a `trainers.id`
+
+**Comportamento di eliminazione**: Restrict  
+**Note**: L'eliminazione di un formatore è impedita se ha pianificazioni associate.
+
+### 6. Schedule (Pianificazione) → Sessions (Sessioni)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Una pianificazione può avere molte sessioni, ma ogni sessione appartiene a una sola pianificazione.  
+**Campi chiave**:
+- `sessions.scheduleId` → riferimento a `schedules.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di una pianificazione comporta la cancellazione di tutte le sessioni associate.
+
+### 7. Schedule (Pianificazione) → Attestati (Certificati)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Una pianificazione può avere molti attestati emessi, ma ogni attestato è associato a una sola pianificazione.  
+**Campi chiave**:
+- `attestati.scheduleId` → riferimento a `schedules.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di una pianificazione comporta la cancellazione di tutti gli attestati associati.
+
+### 8. Schedule (Pianificazione) → Companies (Aziende)
+
+**Tipo di relazione**: Many-to-Many  
+**Descrizione**: Una pianificazione può coinvolgere molte aziende, e un'azienda può partecipare a molte pianificazioni.  
+**Tabella di giunzione**: `scheduleCompanies`  
+**Campi chiave**:
+- `scheduleCompanies.scheduleId` → riferimento a `schedules.id`
+- `scheduleCompanies.companyId` → riferimento a `companies.id`
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di una pianificazione o di un'azienda comporta la cancellazione delle associazioni nella tabella di giunzione.
+
+### 9. Employee (Dipendente) → Schedule Attendance (Partecipazione)
+
+**Tipo di relazione**: Many-to-Many  
+**Descrizione**: Un dipendente può partecipare a molte pianificazioni, e una pianificazione può avere molti partecipanti.  
+**Tabella di giunzione**: `scheduleAttendance`  
+**Campi chiave**:
+- `scheduleAttendance.employeeId` → riferimento a `employees.id`
+- `scheduleAttendance.scheduleId` → riferimento a `schedules.id`
+- `scheduleAttendance.attended` → flag booleano
+
+**Comportamento di eliminazione**: Cascade  
+**Note**: L'eliminazione di un dipendente o di una pianificazione comporta la cancellazione dei record di partecipazione associati.
+
+### 10. Template → Attestati (Certificati)
+
+**Tipo di relazione**: One-to-Many  
+**Descrizione**: Un template può essere utilizzato per generare molti attestati, ma ogni attestato è basato su un solo template.  
+**Campi chiave**:
+- `attestati.templateId` → riferimento a `templates.id`
+
+**Comportamento di eliminazione**: Restrict  
+**Note**: L'eliminazione di un template è impedita se ha attestati associati.
+
+## Diagrammi Dettagliati per Area Funzionale
+
+### Gestione Corsi e Pianificazioni
+
+```
+┌─────────────┐
+│             │
+│    Course   │
+│             │
+└──────┬──────┘
+       │
+       │ 1:N
+       ▼
+┌─────────────┐                   ┌─────────────┐
+│             │                   │             │
+│   Schedule  │◄──────N:1─────────┤   Trainer   │
+│             │                   │             │
+└──────┬──────┘                   └─────────────┘
+       │
+       │ 1:N
+       ▼
+┌─────────────┐
+│             │
+│   Session   │
+│             │
+└─────────────┘
+```
+
+### Gestione Aziende e Dipendenti
+
+```
+┌─────────────┐
+│             │
+│   Company   │
+│             │
+└──────┬──────┘
+       │
+       ├───────1:N────────┐
+       │                  │
+       ▼                  ▼
+┌─────────────┐     ┌─────────────┐
+│             │     │             │
+│  Department │     │   Employee  │
+│             │     │             │
+└──────┬──────┘     └─────────────┘
+       │                  ▲
+       │                  │
+       └───────1:N────────┘
+```
+
+### Gestione Partecipazione e Certificazione
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│             │     │             │     │             │
+│   Employee  │◄─N:M─┤   Schedule  │◄─1:N─┤  Attestato  │
+│             │     │             │     │             │
+└─────────────┘     └─────────────┘     └──────▲──────┘
+                                                │
+                                                │
+                                          ┌─────┴─────┐
+                                          │           │
+                                          │  Template │
+                                          │           │
+                                          └───────────┘
+```
+
+## Note sulle Relazioni e Vincoli di Integrità
+
+1. **Codice Fiscale**: Il campo `codiceFiscale` per i dipendenti è obbligatorio e deve essere formattato secondo lo standard italiano.
+
+2. **Tariffa Oraria**: I formatori hanno un campo `tariffaOraria` che rappresenta il loro compenso orario.
+
+3. **Anno Progressivo**: Gli attestati hanno un campo `annoProgressivo` che combina l'anno di emissione con un contatore progressivo.
+
+4. **Modalità di Erogazione**: Le pianificazioni hanno un campo `deliveryMode` che può assumere i valori IN_PERSON, ONLINE o HYBRID.
+
+5. **Cascade Delete**: Le eliminazioni a cascata sono configurate per le relazioni Schedule → Sessions, Company → Departments e Schedule → Attestati come evidenziato nella migrazione `20250507071501_cascade_delete_schedules`.
+
+## Considerazioni per lo Sviluppo
+
+1. Quando si lavora con le relazioni tra pianificazioni e aziende, tenere presente che la relazione è many-to-many.
+
+2. I record di partecipazione (scheduleAttendance) includono un flag `attended` che deve essere gestito separatamente dall'assegnazione di dipendenti a una pianificazione.
+
+3. Il campo `companyId` è stato reso opzionale nella pianificazione (migrazione `20250508071632_make_companyid_optional_in_schedule`), probabilmente per supportare pianificazioni che non sono specifiche per un'azienda.
+
+4. I template sono collegati agli attestati attraverso una tabella di collegamento (come indicato nella migrazione `20250507062644_add_template_link_table`), il che potrebbe implicare funzionalità avanzate di personalizzazione.
+
+5. La migrazione `20250508063031_add_all_document_types` ha aggiunto supporto per diversi tipi di documenti, che potrebbero avere relazioni diverse con le entità principali.

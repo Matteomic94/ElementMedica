@@ -1,0 +1,33 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Backend Architecture
+
+The backend is organized in a Node.js application with Prisma ORM for database access.
+
+## Key Components
+
+- `backend/prisma/` - Database schema
+  - Italian terminology is used for some entities (e.g., "Aziende" for companies)
+
+- `backend/routes/` - API endpoints and route handlers
+  - Organized around entity types (employees, courses, etc.)
+
+- `backend/generated/prisma/` - Auto-generated Prisma client code
+
+## File Storage
+
+- `backend/uploads/` - File storage for uploaded documents:
+  - `attestati/` - Certificate documents
+  - `templates/` - Document templates
+
+## Database Structure
+
+The database schema supports:
+- Employee and trainer management
+- Course scheduling and attendance tracking
+- Company and department organization
+- Document generation with templates
+- Various document types with specific metadata

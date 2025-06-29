@@ -1,0 +1,259 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Pattern Comuni nel Progetto
+
+Questo documento illustra i pattern di codice comuni utilizzati nel progetto per garantire coerenza e facilità di manutenzione.
+
+## Pattern Factory per i Servizi API
+
+Il progetto utilizza un pattern factory per standardizzare le chiamate API:
+
+```typescript
+// Esempio di utilizzo del pattern factory per servizi API
+import { createService } from './serviceFactory';
+import type { Entity, EntityCreate, EntityUpdate } from '../types';
+
+// Creazione del servizio base
+const baseService = createService<Entity, EntityCreate, EntityUpdate>('/entities');
+
+// Estensione con metodi personalizzati
+const entityService = baseService.extend({
+  customMethod: async (param: string): Promise<any> => {
+    // Implementazione...
+  }
+});
+
+// Esportazione dei metodi standard
+export const getEntities = entityService.getAll;
+export const getEntity = entityService.getById;
+export const createEntity = entityService.create;
+export const updateEntity = entityService.update;
+export const deleteEntity = entityService.delete;
+
+// Esportazione dei metodi personalizzati
+export const customMethod = entityService.customMethod;
+
+// Esportazione dell'intero servizio
+export default entityService;
+```
+
+## Pattern per i Componenti React
+
+### Componenti Funzionali con TypeScript
+
+```tsx
+// Esempio di componente funzionale con TypeScript
+import React from 'react';
+
+interface ButtonProps {
+  label: string;
+  onClick: () => void;
+  variant?: 'primary' | 'secondary' | 'danger';
+  disabled?: boolean;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  label,
+  onClick,
+  variant = 'primary',
+  disabled = false
+}) => {
+  const baseClasses = 'px-4 py-2 rounded';
+  const variantClasses = {
+    primary: 'bg-blue-500 text-white',
+    secondary: 'bg-gray-200 text-gray-800',
+    danger: 'bg-red-500 text-white'
+  };
+  
+  return (
+    <button
+      className={`${baseClasses} ${variantClasses[variant]}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {label}
+    </button>
+  );
+};
+```
+
+### Container/Presentational Pattern
+
+```tsx
+// Componente Container
+import React, { useState, useEffect } from 'react';
+import { EmployeeList } from './EmployeeList';
+import { useEmployees } from '../../hooks/useEmployees';
+
+export const EmployeeListContainer: React.FC = () => {
+  const { employees, loading, error, fetchEmployees } = useEmployees();
+  
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
+  
+  return (
+    <EmployeeList 
+      employees={employees}
+      loading={loading}
+      error={error}
+    />
+  );
+};
+
+// Componente Presentational
+import React from 'react';
+import type { Employee } from '../../types';
+
+interface EmployeeListProps {
+  employees: Employee[];
+  loading: boolean;
+  error: Error | null;
+}
+
+export const EmployeeList: React.FC<EmployeeListProps> = ({
+  employees,
+  loading,
+  error
+}) => {
+  if (loading) return <div>Caricamento in corso...</div>;
+  if (error) return <div>Si è verificato un errore: {error.message}</div>;
+  
+  return (
+    <ul>
+      {employees.map(employee => (
+        <li key={employee.id}>{employee.firstName} {employee.lastName}</li>
+      ))}
+    </ul>
+  );
+};
+```
+
+## Pattern per i Custom Hooks
+
+```typescript
+// Esempio di custom hook
+import { useState, useCallback, useEffect } from 'react';
+import { getEmployees } from '../services/employees';
+import type { Employee } from '../types';
+
+export function useEmployees() {
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+  
+  const fetchEmployees = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const data = await getEmployees();
+      setEmployees(data);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Errore sconosciuto'));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+  
+  return {
+    employees,
+    loading,
+    error,
+    fetchEmployees
+  };
+}
+```
+
+## Pattern per la Gestione degli Errori
+
+```typescript
+// Wrapper per la gestione degli errori nelle chiamate API
+async function safeApiCall<T>(apiCall: () => Promise<T>): Promise<[T | null, Error | null]> {
+  try {
+    const data = await apiCall();
+    return [data, null];
+  } catch (error) {
+    console.error('API error:', error);
+    return [null, error instanceof Error ? error : new Error(String(error))];
+  }
+}
+
+// Utilizzo
+async function fetchData() {
+  const [data, error] = await safeApiCall(() => getEmployees());
+  
+  if (error) {
+    // Gestione dell'errore
+    showErrorToast(error.message);
+    return;
+  }
+  
+  // Utilizzo dei dati
+  processData(data);
+}
+```
+
+## Pattern per i Form
+
+```tsx
+// Esempio di pattern per form con stato locale
+import React, { useState } from 'react';
+
+interface EmployeeFormProps {
+  onSubmit: (data: EmployeeFormData) => void;
+  initialData?: EmployeeFormData;
+}
+
+interface EmployeeFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export const EmployeeForm: React.FC<EmployeeFormProps> = ({
+  onSubmit,
+  initialData = { firstName: '', lastName: '', email: '' }
+}) => {
+  const [formData, setFormData] = useState<EmployeeFormData>(initialData);
+  const [errors, setErrors] = useState<Partial<Record<keyof EmployeeFormData, string>>>({});
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+  
+  const validate = (): boolean => {
+    const newErrors: Partial<Record<keyof EmployeeFormData, string>> = {};
+    
+    if (!formData.firstName) newErrors.firstName = 'Il nome è obbligatorio';
+    if (!formData.lastName) newErrors.lastName = 'Il cognome è obbligatorio';
+    if (!formData.email) {
+      newErrors.email = 'L\'email è obbligatoria';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'L\'email non è valida';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+  
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validate()) {
+      onSubmit(formData);
+    }
+  };
+  
+  return (
+    <form onSubmit={handleSubmit}>
+      {/* Campi del form */}
+    </form>
+  );
+};
+```
+
+Seguendo questi pattern comuni si garantisce una struttura coerente in tutto il progetto, facilitando la manutenzione e la comprensione del codice.

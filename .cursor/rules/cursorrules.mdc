@@ -1,0 +1,80 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# REGOLE PER LO SVILUPPO CON CURSOR
+
+Questo documento definisce le regole per lo sviluppo dell'applicazione ElementSoftware con Cursor.
+
+## ARCHITETTURA DEI SERVER
+
+### 🚫 DIVIETI ASSOLUTI
+
+1. **NON creare nuovi server**: L'architettura è definitiva e comprende solo:
+   - API Server (porta 4001)
+   - Documents Server (porta 4002)
+   - Proxy Server (porta 4003)
+
+2. **NON modificare le porte standard**: Le porte sono definite e non devono essere cambiate.
+
+3. **NON bypassare il Proxy Server**: Tutte le comunicazioni frontend devono passare per il Proxy Server sulla porta 4003.
+
+4. **NON implementare funzionalità duplicate**: Se esiste già un servizio che fa ciò che serve, usare quello esistente.
+
+### ✅ REGOLE OBBLIGATORIE
+
+1. **Rispettare la separazione delle responsabilità**:
+   - API Server: gestione dati e logica business
+   - Documents Server: generazione e gestione documenti
+   - Proxy Server: routing e coordinamento
+
+2. **Estendere i server esistenti**: Per nuove funzionalità, estendere i server esistenti anziché crearne di nuovi.
+
+## SVILUPPO DEI COMPONENTI
+
+### 🚫 DIVIETI ASSOLUTI
+
+1. **NON duplicare componenti esistenti**: Verificare sempre l'esistenza di componenti riutilizzabili.
+
+2. **NON modificare il comportamento dei componenti esistenti**: Le modifiche devono essere retro-compatibili.
+
+3. **NON eliminare funzionalità esistenti**: Le funzionalità funzionanti non devono essere rimosse.
+
+### ✅ REGOLE OBBLIGATORIE
+
+1. **Creare componenti riutilizzabili**: Progettare componenti modulari e riutilizzabili.
+
+2. **Seguire la convenzione di nomenclatura esistente**:
+   - Componenti React: PascalCase
+   - File di utilità: camelCase
+   - Costanti: UPPERCASE_WITH_UNDERSCORES
+
+3. **Mantenere la coerenza visiva**:
+   - Rispettare la palette di colori esistente
+   - Mantenere lo stile UI coerente
+   - Usare i componenti UI esistenti
+
+## GESTIONE DEL CODICE
+
+1. **NON rimuovere parti di codice funzionanti**: Il codice che funziona non deve essere toccato a meno che non sia necessario.
+
+2. **NON introdurre dipendenze inutili**: Prima di aggiungere nuove librerie, verificare se esiste già una soluzione interna.
+
+3. **Commentare il codice complesso**: Le parti difficili da comprendere devono essere ben documentate.
+
+4. **Rispettare il pattern di gestione degli errori esistente**: Utilizzare i wrapper e i gestori di errori esistenti.
+
+## IMPLEMENTAZIONE DELLE NUOVE FUNZIONALITÀ
+
+1. **Verificare componenti esistenti**: Prima di iniziare, controllare se esistono già componenti simili.
+
+2. **Estendere invece che duplicare**: Se esiste un componente simile, estenderlo invece di duplicarlo.
+
+3. **Progettare per il riutilizzo**: Ogni nuovo componente deve essere progettato pensando al riutilizzo.
+
+4. **Rispettare la struttura esistente**: Inserire i nuovi file nella posizione corretta nell'albero del progetto.
+
+---
+
+⚠️ **NOTA IMPORTANTE**: Queste regole sono considerate vincolanti per tutti gli sviluppatori. La violazione di queste regole comporterà la necessità di rivedere e correggere il lavoro.

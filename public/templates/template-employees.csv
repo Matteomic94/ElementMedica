@@ -1,0 +1,3 @@
+firstName,lastName,email,title,department,companyId,status,phone,dateOfBirth,address
+John,Doe,john.doe@example.com,Developer,Engineering,123,Active,+1234567890,1990-01-01,123 Main St
+Jane,Smith,jane.smith@example.com,Manager,HR,123,Active,+0987654321,1985-05-15,456 Elm St 

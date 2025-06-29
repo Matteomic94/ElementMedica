@@ -1,0 +1,237 @@
+{
+  "version": "1.0",
+  "lastUpdated": "2023-06-08T16:20:00Z",
+  "patterns": {
+    "ui": {
+      "componentOrganization": {
+        "name": "Organizzazione Componenti",
+        "description": "I componenti sono organizzati per funzionalità/dominio in directory separate",
+        "examples": [
+          "src/components/employees/",
+          "src/components/courses/"
+        ],
+        "bestPractices": [
+          "Mantenere i componenti correlati nella stessa directory",
+          "Usare index.ts per esportare componenti pubblici dalla directory"
+        ]
+      },
+      "presentationalContainer": {
+        "name": "Pattern Presentational/Container",
+        "description": "Separazione tra componenti di presentazione (UI) e container (logica/dati)",
+        "examples": [
+          "EmployeeList (presentational) + EmployeeListContainer (container)",
+          "CourseForm (presentational) + CourseFormContainer (container)"
+        ],
+        "bestPractices": [
+          "Componenti presentazionali accettano props e gestiscono UI",
+          "Container gestiscono stato, API calls e logica business",
+          "Riutilizzare componenti presentazionali in diversi container"
+        ]
+      },
+      "composableComponents": {
+        "name": "Componenti Componibili",
+        "description": "Componenti piccoli e riutilizzabili che possono essere composti in componenti più complessi",
+        "examples": [
+          "Button, Input, Select composti in Form",
+          "Card, Badge, Avatar composti in ProfileCard"
+        ],
+        "bestPractices": [
+          "Creare componenti atomici con responsabilità singola",
+          "Utilizzare props.children per composizione",
+          "Utilizzare styled components per varianti"
+        ]
+      },
+      "errorBoundaries": {
+        "name": "Error Boundaries",
+        "description": "Componenti che catturano errori JavaScript in componenti figli",
+        "examples": [
+          "src/components/shared/ErrorBoundary.tsx"
+        ],
+        "bestPractices": [
+          "Wrappare aree critiche con error boundaries",
+          "Fornire UI di fallback in caso di errore",
+          "Loggare errori catturati"
+        ]
+      }
+    },
+    "state": {
+      "contextAPI": {
+        "name": "React Context API",
+        "description": "Utilizzo di React Context per stato globale o condiviso",
+        "examples": [
+          "src/context/AuthContext.tsx",
+          "src/context/ThemeContext.tsx"
+        ],
+        "bestPractices": [
+          "Usare per stato che deve essere accessibile in molti componenti",
+          "Separare provider in componenti dedicati",
+          "Ottimizzare con useMemo/useCallback per prevenire re-render inutili"
+        ]
+      },
+      "customHooks": {
+        "name": "Custom Hooks",
+        "description": "Hook personalizzati per logica riutilizzabile",
+        "examples": [
+          "useEmployees, useCourses per logica API",
+          "useForm per gestione form",
+          "useTable per logica tabelle"
+        ],
+        "bestPractices": [
+          "Estrarre logica riutilizzabile in custom hooks",
+          "Nominare con prefisso 'use'",
+          "Mantenere singola responsabilità"
+        ]
+      },
+      "reducerPattern": {
+        "name": "Reducer Pattern",
+        "description": "Utilizzo di useReducer per stato complesso",
+        "examples": [
+          "src/components/employees/EmployeeFormReducer.ts",
+          "src/hooks/useFilters.ts"
+        ],
+        "bestPractices": [
+          "Usare per stato con logica complessa o molte azioni",
+          "Definire tipi per stato e azioni",
+          "Separare reducer in file dedicato"
+        ]
+      }
+    },
+    "api": {
+      "serviceFactory": {
+        "name": "Service Factory Pattern",
+        "description": "Factory per creare servizi API consistenti",
+        "examples": [
+          "src/services/serviceFactory.ts",
+          "src/services/employeeService.ts"
+        ],
+        "bestPractices": [
+          "Usare factory per configurazione consistente",
+          "Specificare endpoints come costanti",
+          "Includere gestione errori standard"
+        ]
+      },
+      "dataFetchingHooks": {
+        "name": "Data Fetching Hooks",
+        "description": "Custom hooks per incapsulare chiamate API e stato correlato",
+        "examples": [
+          "src/hooks/api/useEmployees.ts",
+          "src/hooks/api/useCourses.ts"
+        ],
+        "bestPractices": [
+          "Incapsulare chiamate API in hooks dedicati",
+          "Gestire loading, error, e data state",
+          "Fornire funzioni per mutare dati"
+        ]
+      },
+      "errorHandling": {
+        "name": "Gestione Errori Centralizzata",
+        "description": "Approccio centralizzato alla gestione errori API",
+        "examples": [
+          "src/hooks/useErrorHandler.ts",
+          "src/services/errorHandler.ts"
+        ],
+        "bestPractices": [
+          "Catturare e processare errori in modo consistente",
+          "Fornire messaggi di errore user-friendly",
+          "Loggare errori per debugging"
+        ]
+      }
+    },
+    "routing": {
+      "featureBasedRouting": {
+        "name": "Routing Basato su Feature",
+        "description": "Organizzazione route per feature/dominio",
+        "examples": [
+          "src/pages/employees/",
+          "src/pages/courses/"
+        ],
+        "bestPractices": [
+          "Strutturare pages per feature",
+          "Utilizzare route nesting per sub-feature",
+          "Mantenere coerenza tra struttura route e componenti"
+        ]
+      },
+      "layoutPattern": {
+        "name": "Layout Pattern",
+        "description": "Componenti layout riutilizzabili per diversi gruppi di route",
+        "examples": [
+          "src/components/layouts/AppLayout.tsx",
+          "src/components/layouts/AuthLayout.tsx"
+        ],
+        "bestPractices": [
+          "Creare layout per aree funzionali dell'app",
+          "Utilizzare nesting dei layout quando necessario",
+          "Separare layout dal content"
+        ]
+      }
+    },
+    "forms": {
+      "formHooks": {
+        "name": "Form Management Hooks",
+        "description": "Custom hooks per gestione state e validazione form",
+        "examples": [
+          "src/hooks/useForm.ts"
+        ],
+        "bestPractices": [
+          "Gestire state, validazione e submission in hook dedicato",
+          "Separare UI form dalla logica",
+          "Supportare validazione schema-based"
+        ]
+      },
+      "fieldComponents": {
+        "name": "Field Components",
+        "description": "Componenti form field riutilizzabili con validazione integrata",
+        "examples": [
+          "src/components/ui/Input.tsx",
+          "src/components/ui/Select.tsx"
+        ],
+        "bestPractices": [
+          "Creare wrapper consistenti per elementi form nativi",
+          "Supportare gestione errori inline",
+          "Mantenere API consistente tra diversi tipi di input"
+        ]
+      },
+      "formComposition": {
+        "name": "Form Composition",
+        "description": "Composizione di form complessi da sezioni riutilizzabili",
+        "examples": [
+          "src/components/employees/EmployeeForm.tsx utilizza components/forms/ContactInfoSection.tsx"
+        ],
+        "bestPractices": [
+          "Dividere form complessi in sezioni logiche",
+          "Riutilizzare sezioni comuni tra form diversi",
+          "Passare subset di form state alle sezioni"
+        ]
+      }
+    },
+    "performance": {
+      "memoization": {
+        "name": "Memoization",
+        "description": "Utilizzo di React.memo, useMemo e useCallback per ottimizzazioni",
+        "examples": [
+          "React.memo per componenti UI puri",
+          "useMemo per calcoli costosi",
+          "useCallback per event handlers passati a componenti figli"
+        ],
+        "bestPractices": [
+          "Memoizzare componenti che ricevono le stesse props frequentemente",
+          "Usare useMemo per calcoli costosi",
+          "Stabilizzare callback con useCallback quando passati come props"
+        ]
+      },
+      "lazyLoading": {
+        "name": "Lazy Loading",
+        "description": "Caricamento componenti on-demand per ridurre bundle iniziale",
+        "examples": [
+          "import dinamico per route secondarie",
+          "React.lazy per componenti pesanti"
+        ],
+        "bestPractices": [
+          "Utilizzare per componenti non critici per il first render",
+          "Aggiungere Suspense con fallback UI",
+          "Considerare code-splitting per route"
+        ]
+      }
+    }
+  }
+} 
