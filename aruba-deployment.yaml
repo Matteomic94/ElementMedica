@@ -47,7 +47,7 @@ onInstall:
   
   - cmd[cp]:
       - 'cd /var/www/webroot/ROOT'
-      - 'git clone https://github.com/matteo-michielon/project-2-0.git . || echo "Repository non trovato, usando codice locale..."'
+      - 'git clone https://github.com/Matteomic94/ElementMedica.git . || echo "Repository non trovato, usando codice locale..."'
       - 'npm install'
       - 'cd backend && npm install'
 
