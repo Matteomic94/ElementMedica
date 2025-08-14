@@ -3,8 +3,8 @@ import { getTrainers, createTrainer, updateTrainer, Trainer } from '../services/
 import { useQuery } from '@tanstack/react-query';
 
 export interface TrainerInsert {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
   specialization?: string;
@@ -14,8 +14,8 @@ export interface TrainerInsert {
 }
 
 export interface TrainerUpdate {
-  first_name?: string;
-  last_name?: string;
+  firstName?: string;
+  lastName?: string;
   email?: string;
   phone?: string;
   specialization?: string;

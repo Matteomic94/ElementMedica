@@ -61,6 +61,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
   pill = true,
   showArrow = true,
 }) => {
+  // Le azioni vengono usate direttamente senza memoizzazione
+  // per evitare loop infiniti quando sono funzioni inline
+  
   // Varianti di stile per il bottone
   const variantStyles = {
     primary: 'bg-blue-600 text-white hover:bg-blue-700',

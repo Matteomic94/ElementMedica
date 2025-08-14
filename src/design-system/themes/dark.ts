@@ -95,37 +95,37 @@ export const darkTheme = {
 // CSS Variables for dark theme
 export const darkThemeCSSVars = {
   // Background
-  '--color-bg-primary': darkTheme.background.primary,
-  '--color-bg-secondary': darkTheme.background.secondary,
-  '--color-bg-tertiary': darkTheme.background.tertiary,
-  '--color-bg-elevated': darkTheme.background.elevated,
-  '--color-bg-overlay': darkTheme.background.overlay,
+  '--color-bg-primary': colors.neutral[900],
+  '--color-bg-secondary': colors.neutral[800],
+  '--color-bg-tertiary': colors.neutral[700],
+  '--color-bg-elevated': colors.neutral[850],
+  '--color-bg-overlay': 'rgba(0, 0, 0, 0.8)',
 
   // Text
-  '--color-text-primary': darkTheme.text.primary,
-  '--color-text-secondary': darkTheme.text.secondary,
-  '--color-text-tertiary': darkTheme.text.tertiary,
-  '--color-text-inverse': darkTheme.text.inverse,
-  '--color-text-disabled': darkTheme.text.disabled,
+  '--color-text-primary': colors.neutral[50],
+  '--color-text-secondary': colors.neutral[300],
+  '--color-text-tertiary': colors.neutral[400],
+  '--color-text-inverse': colors.neutral[900],
+  '--color-text-disabled': colors.neutral[600],
 
   // Border
-  '--color-border-primary': darkTheme.border.primary,
-  '--color-border-secondary': darkTheme.border.secondary,
-  '--color-border-focus': darkTheme.border.focus,
-  '--color-border-error': darkTheme.border.error,
-  '--color-border-success': darkTheme.border.success,
+  '--color-border-primary': colors.neutral[700],
+  '--color-border-secondary': colors.neutral[600],
+  '--color-border-focus': colors.primary[400],
+  '--color-border-error': colors.semantic.error[400],
+  '--color-border-success': colors.semantic.success[400],
 
   // Interactive
-  '--color-interactive-primary': darkTheme.interactive.primary.default,
-  '--color-interactive-primary-hover': darkTheme.interactive.primary.hover,
-  '--color-interactive-primary-active': darkTheme.interactive.primary.active,
-  '--color-interactive-primary-disabled': darkTheme.interactive.primary.disabled,
+  '--color-interactive-primary': colors.primary[500],
+  '--color-interactive-primary-hover': colors.primary[400],
+  '--color-interactive-primary-active': colors.primary[300],
+  '--color-interactive-primary-disabled': colors.primary[800],
 
   // Shadows
-  '--shadow-sm': darkTheme.shadow.sm,
-  '--shadow-md': darkTheme.shadow.md,
-  '--shadow-lg': darkTheme.shadow.lg,
-  '--shadow-xl': darkTheme.shadow.xl,
+  '--shadow-sm': '0 1px 2px 0 rgba(0, 0, 0, 0.3)',
+  '--shadow-md': '0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3)',
+  '--shadow-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3)',
+  '--shadow-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3)',
 } as const;
 
 export default darkTheme;

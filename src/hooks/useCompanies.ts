@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getCompanies, createCompany, updateCompany, deleteCompany } from '../services/companies';
-
-// Define Company interface based on the actual data structure
-export interface Company {
-  id: string;
-  ragione_sociale: string;
-  piva?: string;
-  address?: string;
-  cap?: string;
-  city?: string;
-  phone?: string;
-  email?: string;
-  [key: string]: any; // Allow additional properties
-}
+import { Company } from '../types';
 
 export function useCompanies() {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -63,7 +51,7 @@ export function useCompanies() {
   }, [loadCompanies]);
 
   // Add company with optimistic update
-  async function addCompany(company: Partial<Company>) {
+  const addCompany = useCallback(async (company: Omit<Company, 'id'> & { id?: string }) => {
     try {
       setError(null);
       
@@ -87,15 +75,15 @@ export function useCompanies() {
       setError(err instanceof Error ? err.message : 'Failed to create company');
       throw err;
     }
-  }
+  }, []);
 
   // Edit company with optimistic update
-  async function editCompany(id: string, company: Partial<Company>) {
+  const editCompany = useCallback(async (id: string, company: Partial<Company>) => {
+    // Store original for potential rollback
+    const originalCompany = companies.find((c) => c.id === id);
+    
     try {
       setError(null);
-      
-      // Store original for potential rollback
-      const originalCompany = companies.find((c) => c.id === id);
       
       // Optimistic update
       setCompanies((prev) => prev.map((c) => c.id === id ? { ...c, ...company } : c));
@@ -115,15 +103,15 @@ export function useCompanies() {
       setError(err instanceof Error ? err.message : 'Failed to update company');
       throw err;
     }
-  }
+  }, [companies]);
 
   // Optimistic delete
-  async function removeCompany(id: string) {
+  const removeCompany = useCallback(async (id: string) => {
+    // Store original for potential rollback
+    const originalCompany = companies.find((c) => c.id === id);
+    
     try {
       setError(null);
-      
-      // Store original for potential rollback
-      const originalCompany = companies.find((c) => c.id === id);
       
       // Optimistic update
       setCompanies((prev) => prev.filter((c) => c.id !== id));
@@ -139,7 +127,7 @@ export function useCompanies() {
       setError(err instanceof Error ? err.message : 'Failed to delete company');
       throw err;
     }
-  }
+  }, [companies]);
 
   // Force refresh function for manual refresh
   const refresh = useCallback(() => loadCompanies(true), [loadCompanies]);

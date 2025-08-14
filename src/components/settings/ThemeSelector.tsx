@@ -5,9 +5,9 @@
 
 import React from 'react';
 import { Sun, Moon, Monitor, Palette } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../../design-system/molecules/Card';
+import { Button } from '../../design-system/atoms/Button';
+import { Badge } from '../../design-system/atoms/Badge';
 import { useTheme } from '../../hooks/useTheme';
 import { ThemeMode, ThemeColor } from '../../types/preferences';
 

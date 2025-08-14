@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import axios from 'axios';
+import { apiGet, apiDelete } from '../../services/api';
 import { Button } from '../../design-system/atoms/Button';
 import { SearchBar } from '../../design-system/molecules';
 import { SearchBarControls } from '../../design-system/molecules/SearchBarControls';
 import ResizableTable from '../../components/shared/ResizableTable';
+import { sanitizeErrorMessage } from '../../utils/errorUtils';
+import { Company } from '../../types';
 
 interface Attestato {
   id: string;
@@ -19,13 +21,10 @@ interface Attestato {
   issued: boolean;
   dataGenerazione: string;
   employee: {
-    first_name: string;
-    last_name: string;
+    firstName: string;
+    lastName: string;
     codice_fiscale: string;
-    company?: {
-      id: string;
-      ragione_sociale: string;
-    };
+    company?: Company;
   };
   scheduledCourse: {
     course: {
@@ -121,8 +120,8 @@ const Attestati: React.FC<AttestatiProps> = ({
   const fetchAttestati = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<Attestato[]>('http://localhost:4000/attestati');
-      setAttestati(response.data as Attestato[]);
+      const data = await apiGet<Attestato[]>('/api/attestati');
+      setAttestati(data as Attestato[]);
     } catch (err) {
       setError('Errore nel caricamento degli attestati');
       console.error('Error fetching attestati:', err);
@@ -133,15 +132,12 @@ const Attestati: React.FC<AttestatiProps> = ({
 
   const handleDeleteAttestato = async (id: string, close?: () => void) => {
     try {
-      const res = await axios.delete(`http://localhost:4000/attestati/${id}`);
-      if (res.status === 204) {
-        setAttestati(attestati.filter(a => a.id !== id));
-        if (close) setTimeout(close, 100);
-      } else {
-        alert('Errore durante l\'eliminazione (status ' + res.status + ')');
-      }
+      await apiDelete(`/api/attestati/${id}`);
+      setAttestati(attestati.filter(a => a.id !== id));
+      if (close) setTimeout(close, 100);
     } catch (err: any) {
-      alert('Errore durante l\'eliminazione: ' + (err?.message || err));
+      const userMessage = sanitizeErrorMessage(err, 'Errore durante l\'eliminazione dell\'attestato');
+      alert(userMessage);
     }
   };
 
@@ -151,12 +147,14 @@ const Attestati: React.FC<AttestatiProps> = ({
       return;
     }
     try {
-      const config: any = { data: { ids: selectedIds } };
-      await axios.delete('http://localhost:4000/attestati', config);
+      // Use the attestatiService for multiple deletion
+      const attestatiService = await import('../../services/attestatiService');
+      await attestatiService.default.deleteMultipleAttestati(selectedIds);
       setAttestati(attestati.filter(a => !selectedIds.includes(a.id)));
       setSelectedIds([]);
     } catch (err) {
-      alert('Errore durante l\'eliminazione multipla');
+      const userMessage = sanitizeErrorMessage(err, 'Errore durante l\'eliminazione multipla degli attestati');
+      alert(userMessage);
     }
   };
   
@@ -173,7 +171,7 @@ const Attestati: React.FC<AttestatiProps> = ({
     {
       label: 'Azienda',
       value: 'company',
-      options: [...new Set(attestati.map(a => a.employee.company?.ragione_sociale).filter(Boolean))].map(name => ({
+      options: [...new Set(attestati.map(a => a.employee.company?.ragioneSociale).filter(Boolean))].map(name => ({
         label: name || '',
         value: name || ''
       }))
@@ -204,7 +202,7 @@ const Attestati: React.FC<AttestatiProps> = ({
           }
         >
           {(close) => <>
-            <a href={`http://localhost:4000${attestato.url}`} target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download</a>
+            <a href={`/api${attestato.url}`} target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download</a>
             <button type="button" onClick={e => { e.stopPropagation(); handleDeleteAttestato(attestato.id, close); }} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Elimina</button>
           </>}
         </DropdownMenu>
@@ -220,7 +218,7 @@ const Attestati: React.FC<AttestatiProps> = ({
       key: 'dipendente',
       label: 'Dipendente',
       width: 180,
-      renderCell: (attestato: Attestato) => `${attestato.employee.first_name} ${attestato.employee.last_name}`
+      renderCell: (attestato: Attestato) => `${attestato.employee.firstName} ${attestato.employee.lastName}`
     },
     { 
       key: 'codice_fiscale',
@@ -232,7 +230,7 @@ const Attestati: React.FC<AttestatiProps> = ({
       key: 'azienda',
       label: 'Azienda',
       width: 180,
-      renderCell: (attestato: Attestato) => attestato.employee.company?.ragione_sociale || '--'
+      renderCell: (attestato: Attestato) => attestato.employee.company?.ragioneSociale || '--'
     },
     { 
       key: 'dataGenerazione',
@@ -266,9 +264,9 @@ const Attestati: React.FC<AttestatiProps> = ({
     filteredAttestati = attestati.filter(
       (attestato) =>
         attestato.scheduledCourse.course.title.toLowerCase().includes(lowercaseSearchTerm) ||
-        `${attestato.employee.first_name} ${attestato.employee.last_name}`.toLowerCase().includes(lowercaseSearchTerm) ||
+        `${attestato.employee.firstName} ${attestato.employee.lastName}`.toLowerCase().includes(lowercaseSearchTerm) ||
         attestato.employee.codice_fiscale.toLowerCase().includes(lowercaseSearchTerm) ||
-        (attestato.employee.company?.ragione_sociale || '').toLowerCase().includes(lowercaseSearchTerm)
+        (attestato.employee.company?.ragioneSociale || '').toLowerCase().includes(lowercaseSearchTerm)
     );
   }
   
@@ -281,7 +279,7 @@ const Attestati: React.FC<AttestatiProps> = ({
   
   if (activeFilters.company) {
     filteredAttestati = filteredAttestati.filter(
-      (attestato) => attestato.employee.company?.ragione_sociale === activeFilters.company
+      (attestato) => attestato.employee.company?.ragioneSociale === activeFilters.company
     );
   }
 
@@ -354,7 +352,7 @@ const Attestati: React.FC<AttestatiProps> = ({
                 const attestato = filteredAttestati[index];
                 
                 if (attestato && attestato.url) {
-                  window.open(`http://localhost:4000${attestato.url}`, '_blank');
+                  window.open(`/api${attestato.url}`, '_blank');
                 }
               }
             }}

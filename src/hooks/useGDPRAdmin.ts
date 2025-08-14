@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { apiService } from '../services/api';
 import {
   DeletionRequest,
   ComplianceReport,
@@ -24,14 +24,14 @@ export const useGDPRAdmin = (): UseGDPRAdminReturn => {
       setLoading(true);
       setError(null);
       
-      const response = await apiClient.get<GDPRApiResponse<{ requests: DeletionRequest[] }>>(
+      const response = await apiService.get<{ requests: DeletionRequest[] }>(
         '/api/gdpr/pending-deletions'
       );
       
-      if (response.data.success) {
-        setDeletionRequests(response.data.data.requests);
+      if (response && response.requests) {
+        setDeletionRequests(response.requests);
       } else {
-        throw new Error(response.data.message || 'Failed to fetch deletion requests');
+        throw new Error('Failed to fetch deletion requests');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch deletion requests';
@@ -52,7 +52,7 @@ export const useGDPRAdmin = (): UseGDPRAdminReturn => {
       setLoading(true);
       setError(null);
       
-      const response = await apiClient.post<GDPRApiResponse>(
+      const response = await apiService.post(
         `/api/gdpr/delete/process/${requestId}`,
         {
           approve,
@@ -60,13 +60,13 @@ export const useGDPRAdmin = (): UseGDPRAdminReturn => {
         }
       );
       
-      if (response.data.success) {
+      if (response) {
         // Remove the processed request from the list
         setDeletionRequests(prev => 
           prev.filter(request => request.id !== requestId)
         );
       } else {
-        throw new Error(response.data.message || 'Failed to process deletion request');
+        throw new Error('Failed to process deletion request');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to process deletion request';
@@ -89,14 +89,14 @@ export const useGDPRAdmin = (): UseGDPRAdminReturn => {
         params.append('companyId', companyId);
       }
       
-      const response = await apiClient.get<GDPRApiResponse<{ report: ComplianceReport }>>(
+      const response = await apiService.get<{ report: ComplianceReport }>(
         `/api/gdpr/compliance-report?${params.toString()}`
       );
       
-      if (response.data.success) {
-        setComplianceReport(response.data.data.report);
+      if (response && response.report) {
+        setComplianceReport(response.report);
       } else {
-        throw new Error(response.data.message || 'Failed to generate compliance report');
+        throw new Error('Failed to generate compliance report');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate compliance report';

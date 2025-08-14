@@ -68,12 +68,12 @@ export const cacheMiddleware = (ttl = 3600, keyGenerator = null, shouldCache = n
  * Generate default cache key from request
  */
 function generateDefaultKey(req) {
-  const userId = req.user?.id || 'anonymous';
-  const companyId = req.user?.companyId || 'no-company';
+  const personId = req.person?.id || 'anonymous';
+  const companyId = req.person?.companyId || 'no-company';
   const url = req.originalUrl;
   const query = JSON.stringify(req.query);
   
-  return `route:${userId}:${companyId}:${url}:${query}`;
+  return `route:${personId}:${companyId}:${url}:${query}`;
 }
 
 /**
@@ -100,12 +100,12 @@ export const documentCacheMiddleware = (ttl = 7200) => {
   return cacheMiddleware(
     ttl,
     (req) => {
-      const userId = req.user?.id || 'anonymous';
-      const companyId = req.user?.companyId || 'no-company';
+      const personId = req.person?.id || 'anonymous';
+      const companyId = req.person?.companyId || 'no-company';
       const documentId = req.params.id || req.params.documentId;
       const action = req.route?.path || req.path;
       
-      return `document:${documentId}:${action}:${userId}:${companyId}`;
+      return `document:${documentId}:${action}:${personId}:${companyId}`;
     },
     (req, res, data) => {
       // Cache successful document responses
@@ -140,12 +140,12 @@ export const courseCacheMiddleware = (ttl = 3600) => {
   return cacheMiddleware(
     ttl,
     (req) => {
-      const userId = req.user?.id || 'anonymous';
-      const companyId = req.user?.companyId || 'no-company';
+      const personId = req.person?.id || 'anonymous';
+      const companyId = req.person?.companyId || 'no-company';
       const courseId = req.params.id || req.params.courseId;
       const action = req.route?.path || req.path;
       
-      return `course:${courseId}:${action}:${userId}:${companyId}`;
+      return `course:${courseId}:${action}:${personId}:${companyId}`;
     },
     (req, res, data) => {
       // Cache successful course responses
@@ -204,8 +204,8 @@ export const cacheInvalidationMiddleware = (patterns = []) => {
  * Document invalidation patterns
  */
 export const documentInvalidationPatterns = {
-  userDocuments: (req) => `document:*:user:${req.user?.id}`,
-  companyDocuments: (req) => `document:*:company:${req.user?.companyId}`,
+  userDocuments: (req) => `document:*:user:${req.person?.id}`,
+  companyDocuments: (req) => `document:*:company:${req.person?.companyId}`,
   specificDocument: (req) => `document:${req.params.id || req.params.documentId}:*`,
   allDocuments: () => 'document:*'
 };
@@ -214,8 +214,8 @@ export const documentInvalidationPatterns = {
  * Course invalidation patterns
  */
 export const courseInvalidationPatterns = {
-  userCourses: (req) => `course:*:*:${req.user?.id}:*`,
-  companyCourses: (req) => `course:*:*:*:${req.user?.companyId}`,
+  userCourses: (req) => `course:*:*:${req.person?.id}:*`,
+  companyCourses: (req) => `course:*:*:*:${req.person?.companyId}`,
   specificCourse: (req) => `course:${req.params.id || req.params.courseId}:*`,
   allCourses: () => 'course:*'
 };

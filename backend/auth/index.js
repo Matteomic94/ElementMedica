@@ -11,8 +11,8 @@ import rateLimit from 'express-rate-limit';
 
 // Import authentication components
 import authRoutes from './routes.js';
-import userController from './userController.js';
-import roleController from './roleController.js';
+import personController from './personController.js';
+import roleTypeController from './roleTypeController.js';
 import middleware from './middleware.js';
 import logger from '../utils/logger.js';
 const { authenticate, authorize, auditLog, requireSameCompany: companyIsolation } = middleware;
@@ -30,10 +30,10 @@ export function createAuthRouter() {
     
     // CORS configuration
     router.use(cors({
-        origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+        origin: ['http://localhost:5173', 'http://localhost:3000'],
         credentials: true,
         methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-Platform', 'X-Device-ID']
+        allowedHeaders: ['Content-Type', 'Authorization', 'X-Platform', 'X-Device-ID', 'cache-control', 'pragma', 'expires', 'x-tenant-id', 'X-Tenant-ID', 'X-Requested-With']
     }));
 
     // Global rate limiting
@@ -64,31 +64,27 @@ export function createAuthRouter() {
     // Authentication routes (login, logout, register, etc.)
     router.use('/auth', authRoutes);
 
-    // User management routes
-    router.get('/users', authenticate(), authorize(['users.view']), companyIsolation(), userController.getUsers);
-    router.get('/users/:id', authenticate(), authorize(['users.view']), companyIsolation(), userController.getUserById);
-    router.post('/users', authenticate(), authorize(['users.create']), companyIsolation(), userController.createUser);
-    router.put('/users/:id', authenticate(), authorize(['users.update']), companyIsolation(), userController.updateUser);
-    router.delete('/users/:id', authenticate(), authorize(['users.delete']), companyIsolation(), userController.deleteUser);
+    // Person management routes (legacy /users endpoints for backward compatibility)
+    router.get('/users', authenticate(), authorize(['users.view']), companyIsolation(), personController.getPersons);
+    router.get('/users/:id', authenticate(), authorize(['users.view']), companyIsolation(), personController.getPersonById);
+    router.post('/users', authenticate(), authorize(['users.create']), companyIsolation(), personController.createUser);
+    router.put('/users/:id', authenticate(), authorize(['users.update']), companyIsolation(), personController.updateUser);
+    router.delete('/users/:id', authenticate(), authorize(['users.delete']), companyIsolation(), personController.deleteUser);
     
-    // User role management
-    router.get('/users/:id/roles', authenticate(), authorize(['users.view', 'roles.view']), companyIsolation(), userController.getUserRoles);
-    router.post('/users/:id/roles', authenticate(), authorize(['users.manage_roles']), companyIsolation(), userController.assignRole);
-    router.delete('/users/:id/roles/:roleId', authenticate(), authorize(['users.manage_roles']), companyIsolation(), userController.removeRole);
+    // Person role management
+    router.get('/users/:id/roles', authenticate(), authorize(['users.view', 'roles.view']), companyIsolation(), personController.getPersonRoles);
+    router.post('/users/:id/roles', authenticate(), authorize(['users.manage_roles']), companyIsolation(), personController.assignRole);
+    router.delete('/users/:id/roles/:roleId', authenticate(), authorize(['users.manage_roles']), companyIsolation(), personController.removeRole);
     
     // Password management
-    router.post('/users/:id/reset-password', authenticate(), authorize(['users.update']), companyIsolation(), userController.resetUserPassword);
+    router.post('/users/:id/reset-password', authenticate(), authorize(['users.update']), companyIsolation(), personController.resetPersonPassword);
 
-    // Role management routes
-    router.get('/roles', authenticate(), authorize(['roles.view']), roleController.getRoles);
-    router.get('/roles/:id', authenticate(), authorize(['roles.view']), roleController.getRoleById);
-    router.post('/roles', authenticate(), authorize(['roles.create']), roleController.createRole);
-    router.put('/roles/:id', authenticate(), authorize(['roles.update']), roleController.updateRole);
-    router.delete('/roles/:id', authenticate(), authorize(['roles.delete']), roleController.deleteRole);
-    router.post('/roles/:id/clone', authenticate(), authorize(['roles.create']), roleController.cloneRole);
+    // Role type and permission management routes
+    router.get('/role-types', authenticate(), authorize(['roles.view']), roleTypeController.getRoleTypes);
+    router.get('/person-roles', authenticate(), authorize(['roles.view']), roleTypeController.getPersonRoles);
     
     // Permission management
-    router.get('/permissions', authenticate(), authorize(['roles.view']), roleController.getPermissions);
+    router.get('/permissions', authenticate(), authorize(['roles.view']), roleTypeController.getPermissions);
 
     // Error handling middleware
     router.use((error, req, res, next) => {
@@ -201,8 +197,8 @@ export {
     companyIsolation,
     
     // Controllers
-    userController,
-    roleController,
+    personController,
+    roleTypeController,
     
     // Routes
     authRoutes
@@ -219,6 +215,6 @@ export default {
     authorize,
     auditLog,
     companyIsolation,
-    userController,
-    roleController
+    personController,
+    roleTypeController
 };

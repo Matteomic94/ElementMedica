@@ -7,18 +7,94 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Dependencies
 node_modules
+
+# Build outputs
 dist
 dist-ssr
+build
 *.local
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.docker
+.env.staging
+.env.production
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+backend/prisma/dev.db
+backend/database/
+database.db
+
+# Cache and temporary files
+.cache
+.tmp
+tmp/
+*.tmp
+*.temp
+tsconfig.tsbuildinfo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# Uploads and user content
+uploads/
+backend/uploads/
+
+# Backup files
+backups/
+backend/backups/
+
+# PM2 files
+.pm2
+ecosystem.config.js.backup
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+*.csr
+
+# Docker
+.dockerignore.backup
+
+# Monitoring
+monitoring/data/
+
+# Test files
+test-results/
+*.test.db

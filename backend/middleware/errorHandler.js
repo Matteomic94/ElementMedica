@@ -8,7 +8,7 @@ const globalErrorHandler = (error, req, res, next) => {
     url: req.url,
     ip: req.ip || req.connection.remoteAddress,
     userAgent: req.get('User-Agent'),
-    userId: req.user?.id || null,
+    personId: req.person?.id || null,
     body: req.method !== 'GET' ? req.body : undefined,
     params: req.params,
     query: req.query
@@ -32,7 +32,7 @@ const globalErrorHandler = (error, req, res, next) => {
     message = 'Authentication required';
     
     // Log security event
-    logAudit('UNAUTHORIZED_ACCESS_ATTEMPT', req.user?.id || null, req.url, {
+    logAudit('UNAUTHORIZED_ACCESS_ATTEMPT', req.person?.id || null, req.url, {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
       method: req.method
@@ -43,7 +43,7 @@ const globalErrorHandler = (error, req, res, next) => {
     message = 'Access denied';
     
     // Log security event
-    logAudit('FORBIDDEN_ACCESS_ATTEMPT', req.user?.id || null, req.url, {
+    logAudit('FORBIDDEN_ACCESS_ATTEMPT', req.person?.id || null, req.url, {
       ip: req.ip,
       userAgent: req.get('User-Agent'),
       method: req.method
@@ -101,20 +101,26 @@ const globalErrorHandler = (error, req, res, next) => {
 };
 
 // 404 handler
-const notFoundHandler = (req, res) => {
-  logger.warn('404 Not Found', {
+const notFoundHandler = (req, res, next) => {
+  const error = new Error('Endpoint not found');
+  error.status = 404;
+  error.path = req.path;
+  error.method = req.method;
+  
+  // Log per debugging
+  logger.warn('404 - Endpoint not found', {
     method: req.method,
+    path: req.path,
     url: req.url,
-    ip: req.ip || req.connection.remoteAddress,
     userAgent: req.get('User-Agent'),
-    userId: req.user?.id || null
+    ip: req.ip
   });
-
+  
   res.status(404).json({
     error: 'Endpoint not found',
-    code: 'NOT_FOUND',
-    timestamp: new Date().toISOString(),
-    path: req.url
+    path: req.path,
+    method: req.method,
+    timestamp: new Date().toISOString()
   });
 };
 
@@ -166,6 +172,9 @@ class ConflictError extends AppError {
     super(message, 409, 'CONFLICT');
   }
 }
+
+// Export errorHandler as alias for globalErrorHandler
+export const errorHandler = globalErrorHandler;
 
 export {
   globalErrorHandler,

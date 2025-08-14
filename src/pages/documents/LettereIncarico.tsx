@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
-import axios from 'axios';
+import { apiGet, apiDelete } from '../../services/api';
 import { Button } from '../../design-system/atoms/Button';
 import { SearchBar } from '../../design-system/molecules';
 import { SearchBarControls } from '../../design-system/molecules/SearchBarControls';
 import ResizableTable from '../../components/shared/ResizableTable';
+import { Company } from '../../types';
 
 interface LetteraIncarico {
   id: string;
@@ -17,12 +18,12 @@ interface LetteraIncarico {
   dataGenerazione: string;
   scheduledCourse: {
     course: { title: string; };
-    sessions: { date: string; trainer?: { first_name: string; last_name: string; }; co_trainer?: { first_name: string; last_name: string; } }[];
-    companies: { company: { ragione_sociale: string; } }[];
+    sessions: { date: string; trainer?: { firstName: string; lastName: string; }; co_trainer?: { firstName: string; lastName: string; } }[];
+    companies: { company: Company }[];
   };
   trainer: {
-    first_name: string;
-    last_name: string;
+    firstName: string;
+  lastName: string;
     tariffa_oraria?: number;
   };
 }
@@ -113,8 +114,8 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
   const fetchLettere = async () => {
     try {
       setLoading(true);
-      const response = await axios.get<LetteraIncarico[]>('http://localhost:4000/lettere-incarico');
-      setLettere(response.data as LetteraIncarico[]);
+      const data = await apiGet<LetteraIncarico[]>('/api/lettere-incarico');
+      setLettere(data as LetteraIncarico[]);
     } catch (err) {
       setError('Errore nel caricamento delle lettere di incarico');
       console.error('Error fetching lettere:', err);
@@ -125,13 +126,9 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
 
   const handleDeleteLettera = async (id: string, close?: () => void) => {
     try {
-      const res = await axios.delete(`http://localhost:4000/lettere-incarico/${id}`);
-      if (res.status === 204) {
-        setLettere(lettere.filter(l => l.id !== id));
-        if (close) setTimeout(close, 100);
-      } else {
-        alert('Errore durante l\'eliminazione (status ' + res.status + ')');
-      }
+      await apiDelete(`/api/lettere-incarico/${id}`);
+      setLettere(lettere.filter(l => l.id !== id));
+      if (close) setTimeout(close, 100);
     } catch (err: any) {
       alert('Errore durante l\'eliminazione: ' + (err?.message || err));
     }
@@ -143,8 +140,8 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
       return;
     }
     try {
-      const config: any = { data: { ids: selectedIds } };
-      await axios.delete('http://localhost:4000/lettere-incarico', config);
+      // Delete one by one since we don't have a bulk delete endpoint
+      await Promise.all(selectedIds.map(id => apiDelete(`/api/lettere-incarico/${id}`)));
       setLettere(lettere.filter(l => !selectedIds.includes(l.id)));
       setSelectedIds([]);
     } catch (err) {
@@ -165,7 +162,7 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
     {
       label: 'Formatore',
       value: 'trainer',
-      options: [...new Set(lettere.map(l => `${l.trainer.first_name} ${l.trainer.last_name}`))].map(name => ({
+      options: [...new Set(lettere.map(l => `${l.trainer.firstName} ${l.trainer.lastName}`))].map(name => ({
         label: name,
         value: name
       }))
@@ -196,7 +193,7 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
           }
         >
           {(close) => <>
-            <a href={`http://localhost:4000${lettera.url}`} target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download</a>
+            <a href={`/api${lettera.url}`} target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download</a>
             <button type="button" onClick={e => { e.stopPropagation(); handleDeleteLettera(lettera.id, close); }} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">Elimina</button>
           </>}
         </DropdownMenu>
@@ -212,13 +209,13 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
       key: 'azienda',
       label: 'Azienda',
       width: 180,
-      renderCell: (lettera: LetteraIncarico) => lettera.scheduledCourse.companies?.[0]?.company?.ragione_sociale || '--'
+      renderCell: (lettera: LetteraIncarico) => lettera.scheduledCourse.companies?.[0]?.company?.ragioneSociale || '--'
     },
     { 
       key: 'formatore',
       label: 'Formatore',
       width: 180,
-      renderCell: (lettera: LetteraIncarico) => `${lettera.trainer.first_name} ${lettera.trainer.last_name}`
+      renderCell: (lettera: LetteraIncarico) => `${lettera.trainer.firstName} ${lettera.trainer.lastName}`
     },
     { 
       key: 'tariffa',
@@ -258,8 +255,8 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
     filteredLettere = lettere.filter(
       (lettera) =>
         lettera.scheduledCourse.course.title.toLowerCase().includes(lowercaseSearchTerm) ||
-        `${lettera.trainer.first_name} ${lettera.trainer.last_name}`.toLowerCase().includes(lowercaseSearchTerm) ||
-        (lettera.scheduledCourse.companies?.[0]?.company?.ragione_sociale || '').toLowerCase().includes(lowercaseSearchTerm)
+        `${lettera.trainer.firstName} ${lettera.trainer.lastName}`.toLowerCase().includes(lowercaseSearchTerm) ||
+        (lettera.scheduledCourse.companies?.[0]?.company?.ragioneSociale || '').toLowerCase().includes(lowercaseSearchTerm)
     );
   }
   
@@ -272,7 +269,7 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
   
   if (activeFilters.trainer) {
     filteredLettere = filteredLettere.filter(
-      (lettera) => `${lettera.trainer.first_name} ${lettera.trainer.last_name}` === activeFilters.trainer
+      (lettera) => `${lettera.trainer.firstName} ${lettera.trainer.lastName}` === activeFilters.trainer
     );
   }
 
@@ -345,7 +342,7 @@ const LettereIncarico: React.FC<LettereIncaricoProps> = ({
                 const lettera = filteredLettere[index];
                 
                 if (lettera && lettera.url) {
-                  window.open(`http://localhost:4000${lettera.url}`, '_blank');
+                  window.open(`/api${lettera.url}`, '_blank');
                 }
               }
             }}

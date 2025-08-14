@@ -95,37 +95,37 @@ export const lightTheme = {
 // CSS Variables for light theme
 export const lightThemeCSSVars = {
   // Background
-  '--color-bg-primary': lightTheme.background.primary,
-  '--color-bg-secondary': lightTheme.background.secondary,
-  '--color-bg-tertiary': lightTheme.background.tertiary,
-  '--color-bg-elevated': lightTheme.background.elevated,
-  '--color-bg-overlay': lightTheme.background.overlay,
+  '--color-bg-primary': colors.neutral[50],
+  '--color-bg-secondary': colors.neutral[100],
+  '--color-bg-tertiary': colors.neutral[200],
+  '--color-bg-elevated': '#ffffff',
+  '--color-bg-overlay': 'rgba(0, 0, 0, 0.5)',
 
   // Text
-  '--color-text-primary': lightTheme.text.primary,
-  '--color-text-secondary': lightTheme.text.secondary,
-  '--color-text-tertiary': lightTheme.text.tertiary,
-  '--color-text-inverse': lightTheme.text.inverse,
-  '--color-text-disabled': lightTheme.text.disabled,
+  '--color-text-primary': colors.neutral[900],
+  '--color-text-secondary': colors.neutral[700],
+  '--color-text-tertiary': colors.neutral[500],
+  '--color-text-inverse': '#ffffff',
+  '--color-text-disabled': colors.neutral[400],
 
   // Border
-  '--color-border-primary': lightTheme.border.primary,
-  '--color-border-secondary': lightTheme.border.secondary,
-  '--color-border-focus': lightTheme.border.focus,
-  '--color-border-error': lightTheme.border.error,
-  '--color-border-success': lightTheme.border.success,
+  '--color-border-primary': colors.neutral[200],
+  '--color-border-secondary': colors.neutral[300],
+  '--color-border-focus': colors.primary[500],
+  '--color-border-error': colors.semantic.error[500],
+  '--color-border-success': colors.semantic.success[500],
 
   // Interactive
-  '--color-interactive-primary': lightTheme.interactive.primary.default,
-  '--color-interactive-primary-hover': lightTheme.interactive.primary.hover,
-  '--color-interactive-primary-active': lightTheme.interactive.primary.active,
-  '--color-interactive-primary-disabled': lightTheme.interactive.primary.disabled,
+  '--color-interactive-primary': colors.primary[600],
+  '--color-interactive-primary-hover': colors.primary[700],
+  '--color-interactive-primary-active': colors.primary[800],
+  '--color-interactive-primary-disabled': colors.primary[300],
 
   // Shadows
-  '--shadow-sm': lightTheme.shadow.sm,
-  '--shadow-md': lightTheme.shadow.md,
-  '--shadow-lg': lightTheme.shadow.lg,
-  '--shadow-xl': lightTheme.shadow.xl,
+  '--shadow-sm': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+  '--shadow-md': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  '--shadow-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  '--shadow-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
 } as const;
 
 export default lightTheme;

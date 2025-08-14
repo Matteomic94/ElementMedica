@@ -58,7 +58,7 @@ const auditFormat = winston.format.combine(
       timestamp: info.timestamp,
       level: info.level,
       message: info.message,
-      userId: info.userId || null,
+      personId: info.personId || null,
       action: info.action || null,
       resource: info.resource || null,
       ip: info.ip || null,
@@ -131,10 +131,10 @@ const logError = (error, context = {}) => {
   });
 };
 
-const logAudit = (action, userId, resource, metadata = {}) => {
+const logAudit = (action, personId, resource, metadata = {}) => {
   auditLogger.info('Security audit event', {
     action,
-    userId,
+    personId,
     resource,
     metadata
   });
@@ -153,7 +153,7 @@ const httpLogger = (req, res, next) => {
       duration: `${duration}ms`,
       ip: req.ip || req.connection.remoteAddress,
       userAgent: req.get('User-Agent'),
-      userId: req.user?.id || null,
+      personId: req.person?.id || null,
     };
     
     if (res.statusCode >= 400) {

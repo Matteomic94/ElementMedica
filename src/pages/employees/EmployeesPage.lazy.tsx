@@ -5,9 +5,10 @@ import { LoadingFallback } from '../../components/ui/LoadingFallback';
 /**
  * Lazy-loaded Employees page
  * Week 11 Implementation - Lazy Loading Optimization
+ * Updated to use PersonsPage with employees filter
  */
 
-const EmployeesPage = React.lazy(() => import('./EmployeesPage').then(module => ({ default: module.EmployeesPage })));
+const EmployeesPage = React.lazy(() => import('./EmployeesPageNew'));
 
 export const EmployeesPageLazy: React.FC = () => {
   return (

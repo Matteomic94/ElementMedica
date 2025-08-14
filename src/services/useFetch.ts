@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiGet } from './api';
 import { API_BASE_URL } from '../config/api';
 
 // Tipizzazione per i dati mock
@@ -80,12 +80,12 @@ export function useFetch<T>(url: string, options?: { cache?: boolean, defaultVal
         setError(null);
 
         // Costruisci l'URL completo se è relativo
-        const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-        const response = await axios.get(fullUrl);
+        const fullUrl = url.startsWith('http') ? url : url;
+        const responseData = await apiGet(fullUrl);
         
         if (isMounted) {
           // Normalizza i dati per gestire sia snake_case che camelCase
-          const normalizedData = normalizeResponseData(response.data);
+          const normalizedData = normalizeResponseData(responseData);
           
           // Cast esplicito a T per evitare errori di tipo
           setData(normalizedData as T);
@@ -119,4 +119,4 @@ export function useFetch<T>(url: string, options?: { cache?: boolean, defaultVal
   }, [url]);
 
   return { data, loading, error };
-} 
+}

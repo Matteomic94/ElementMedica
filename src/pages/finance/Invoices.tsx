@@ -5,15 +5,14 @@ import { Button } from '../../design-system/atoms/Button';
 import { SearchBar } from '../../design-system/molecules';
 import { SearchBarControls } from '../../design-system/molecules/SearchBarControls';
 import ResizableTable from '../../components/shared/ResizableTable';
+import { sanitizeErrorMessage } from '../../utils/errorUtils';
+import { Company } from '../../types';
 
 interface Invoice {
   id: string;
   number: string;
   date: string;
-  company?: {
-    id: string;
-    ragione_sociale: string;
-  };
+  company?: Company;
   total: number;
   status: 'draft' | 'issued' | 'paid' | 'overdue';
   payment_date?: string;
@@ -103,7 +102,7 @@ const Invoices: React.FC<InvoicesProps> = ({
     try {
       setLoading(true);
       // In futuro qui verrà fatta una chiamata API reale
-      // const response = await axios.get<Invoice[]>('http://localhost:4000/invoices');
+      // const response = await axios.get<Invoice[]>('/api/invoices');
       // setInvoices(response.data);
       setInvoices([]);
       setError(null);
@@ -118,12 +117,13 @@ const Invoices: React.FC<InvoicesProps> = ({
   const handleDeleteInvoice = async (id: string, close?: () => void) => {
     try {
       // In futuro qui verrà fatta una chiamata API reale
-      // const res = await axios.delete(`http://localhost:4000/invoices/${id}`);
+      // const res = await axios.delete('/api/invoices/${id}');
       setInvoices(invoices.filter(i => i.id !== id));
       if (close) setTimeout(close, 100);
       alert('Fattura eliminata con successo');
     } catch (err: any) {
-      alert('Errore durante l\'eliminazione: ' + (err?.message || err));
+      const userMessage = sanitizeErrorMessage(err, 'Errore durante l\'eliminazione della fattura');
+      alert(userMessage);
     }
   };
   
@@ -142,7 +142,7 @@ const Invoices: React.FC<InvoicesProps> = ({
     {
       label: 'Azienda',
       value: 'company',
-      options: [...new Set(invoices.filter(i => i.company).map(i => i.company?.ragione_sociale))].map(name => ({
+      options: [...new Set(invoices.filter(i => i.company).map(i => i.company?.ragioneSociale))].map(name => ({
         label: name || '',
         value: name || ''
       }))
@@ -198,7 +198,7 @@ const Invoices: React.FC<InvoicesProps> = ({
       key: 'company',
       label: 'Azienda',
       width: 200,
-      renderCell: (invoice: Invoice) => invoice.company?.ragione_sociale || '-'
+      renderCell: (invoice: Invoice) => invoice.company?.ragioneSociale || '-'
     },
     {
       key: 'total',
@@ -247,7 +247,7 @@ const Invoices: React.FC<InvoicesProps> = ({
     filteredInvoices = invoices.filter(
       (invoice) =>
         invoice.number.toLowerCase().includes(lowercaseSearchTerm) ||
-        (invoice.company?.ragione_sociale || '').toLowerCase().includes(lowercaseSearchTerm)
+        (invoice.company?.ragioneSociale || '').toLowerCase().includes(lowercaseSearchTerm)
     );
   }
   
@@ -260,7 +260,7 @@ const Invoices: React.FC<InvoicesProps> = ({
   
   if (activeFilters.company) {
     filteredInvoices = filteredInvoices.filter(
-      (invoice) => invoice.company?.ragione_sociale === activeFilters.company
+      (invoice) => invoice.company?.ragioneSociale === activeFilters.company
     );
   }
 

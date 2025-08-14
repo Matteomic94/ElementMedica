@@ -13,7 +13,13 @@ import { logger } from '../utils/logger.js';
  * - Query parameter: ?version=v1
  */
 function extractVersion(req) {
-  // Check URL path first
+  // Check x-api-version header from proxy first (highest priority)
+  const proxyVersion = req.headers['x-api-version'];
+  if (proxyVersion && /^v\d+$/.test(proxyVersion)) {
+    return proxyVersion;
+  }
+
+  // Check URL path second
   const pathMatch = req.path.match(/^\/api\/(v\d+)\//); 
   if (pathMatch) {
     return pathMatch[1];

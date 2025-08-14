@@ -24,13 +24,14 @@ class PerformanceMonitor {
    * Express middleware for performance monitoring
    */
   middleware() {
+    const self = this;
     return (req, res, next) => {
       const startTime = performance.now();
       const originalSend = res.send;
       
       // Track request start
       req.startTime = startTime;
-      req.requestId = this.generateRequestId();
+      req.requestId = self.generateRequestId();
       
       // Override res.send to capture response time
       res.send = function(data) {
@@ -38,16 +39,16 @@ class PerformanceMonitor {
         const responseTime = endTime - startTime;
         
         // Update metrics
-        this.updateMetrics(req, res, responseTime);
+        self.updateMetrics(req, res, responseTime);
         
         // Log slow requests
         if (responseTime > 1000) { // > 1 second
-          this.logSlowRequest(req, responseTime);
+          self.logSlowRequest(req, responseTime);
         }
         
         // Call original send
-        originalSend.call(this, data);
-      }.bind(this);
+        originalSend.call(res, data);
+      };
       
       next();
     };

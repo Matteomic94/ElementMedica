@@ -387,3 +387,6 @@ export {
   getPerformanceDashboard,
   startPerformanceMonitoring
 };
+
+// Export requestPerformanceMiddleware as default
+export default requestPerformanceMiddleware;

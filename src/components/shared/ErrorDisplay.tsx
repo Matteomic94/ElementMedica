@@ -1,5 +1,6 @@
 import { X, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { useState } from 'react';
+import { sanitizeErrorMessage } from '../../utils/errorUtils';
 
 interface ErrorDisplayProps {
   message: string;
@@ -21,6 +22,9 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   className = ''
 }) => {
   const [showDetails, setShowDetails] = useState(false);
+  
+  // Sanitizza il messaggio di errore per rimuovere riferimenti tecnici
+  const sanitizedMessage = sanitizeErrorMessage(message, 'Si è verificato un errore');
   
   // Colori in base al tipo di messaggio
   const colorMap = {
@@ -55,7 +59,7 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
         <div className="flex">
           {icon}
           <div className="ml-3">
-            <p className={`${text} font-medium`}>{message}</p>
+            <p className={`${text} font-medium`}>{sanitizedMessage}</p>
             
             {details.length > 0 && (
               <div className="mt-1">
@@ -94,4 +98,4 @@ const ErrorDisplay: React.FC<ErrorDisplayProps> = ({
   );
 };
 
-export default ErrorDisplay; 
+export default ErrorDisplay;

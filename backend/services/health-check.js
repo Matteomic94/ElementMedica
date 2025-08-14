@@ -7,7 +7,6 @@ import axios from 'axios';
 import { promisify } from 'util';
 import { logger } from '../utils/logger.js';
 import { getCircuitBreakerHealth } from '../middleware/circuit-breaker.js';
-import { PrismaClient } from '@prisma/client';
 import Redis from 'ioredis';
 import os from 'os';
 
@@ -21,11 +20,6 @@ const HEALTH_CHECK_CONFIG = {
 
 // Service endpoints
 const SERVICES = {
-  'documents-server': {
-    url: 'http://localhost:4002/health',
-    name: 'Documents Server',
-    critical: true
-  },
   'proxy-server': {
     url: 'http://localhost:4003/health',
     name: 'Proxy Server',
@@ -33,10 +27,12 @@ const SERVICES = {
   }
 };
 
+// Documents server removed - not containerized
+
 // Don't check self when running from API server
 if (process.env.API_PORT !== '4001') {
   SERVICES['api-server'] = {
-    url: 'http://localhost:4001/health',
+    url: 'http://api:4001/health',
     name: 'API Server',
     critical: true
   };

@@ -25,15 +25,15 @@ router.get('/files',
   async (req, res) => {
     try {
       const { folderId, useCache = 'true' } = req.query;
-      const userId = req.user.id;
-      const userCompanyId = req.user.companyId;
+      const personId = req.person.id;
+    const userCompanyId = req.person.companyId;
       
       const files = await googleApiService.listFiles(
         folderId || null, 
         useCache === 'true'
       );
       
-      logAudit('google_drive_files_listed', userId, 'google-drive', {
+      logAudit('google_drive_files_listed', personId, 'google-drive', {
         userCompanyId,
         folderId: folderId || 'root',
         fileCount: files.length,
@@ -52,7 +52,7 @@ router.get('/files',
     } catch (error) {
       logger.error('Error listing Google Drive files', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         error: error.message,
         stack: error.stack
       });
@@ -79,8 +79,8 @@ router.get('/file/:fileId',
     try {
       const { fileId } = req.params;
       const { useCache = 'true' } = req.query;
-      const userId = req.user.id;
-      const userCompanyId = req.user.companyId;
+      const personId = req.person.id;
+    const userCompanyId = req.person.companyId;
       
       if (!fileId) {
         return res.status(400).json({
@@ -95,7 +95,7 @@ router.get('/file/:fileId',
         useCache === 'true'
       );
       
-      logAudit('google_drive_file_accessed', userId, 'google-drive', {
+      logAudit('google_drive_file_accessed', personId, 'google-drive', {
         userCompanyId,
         fileId,
         fileName: fileMetadata.name,
@@ -111,7 +111,7 @@ router.get('/file/:fileId',
     } catch (error) {
       logger.error('Error retrieving Google Drive file metadata', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         fileId: req.params.fileId,
         error: error.message,
         stack: error.stack
@@ -139,8 +139,8 @@ router.get('/document/:documentId',
     try {
       const { documentId } = req.params;
       const { useCache = 'true' } = req.query;
-      const userId = req.user.id;
-      const userCompanyId = req.user.companyId;
+      const personId = req.person.id;
+    const userCompanyId = req.person.companyId;
       
       if (!documentId) {
         return res.status(400).json({
@@ -155,7 +155,7 @@ router.get('/document/:documentId',
         useCache === 'true'
       );
       
-      logAudit('google_doc_content_accessed', userId, 'google-docs', {
+      logAudit('google_doc_content_accessed', personId, 'google-docs', {
         userCompanyId,
         documentId,
         documentTitle: documentContent.title,
@@ -170,7 +170,7 @@ router.get('/document/:documentId',
     } catch (error) {
       logger.error('Error retrieving Google Doc content', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         documentId: req.params.documentId,
         error: error.message,
         stack: error.stack
@@ -198,8 +198,8 @@ router.post('/template/:templateId/copy',
     try {
       const { templateId } = req.params;
       const { newName, destinationFolderId } = req.body;
-      const userId = req.user.id;
-      const userCompanyId = req.user.companyId;
+      const personId = req.person.id;
+    const userCompanyId = req.person.companyId;
       
       if (!templateId) {
         return res.status(400).json({
@@ -223,7 +223,7 @@ router.post('/template/:templateId/copy',
         destinationFolderId
       );
       
-      logAudit('google_doc_template_copied', userId, 'google-docs', {
+      logAudit('google_doc_template_copied', personId, 'google-docs', {
         userCompanyId,
         templateId,
         newDocumentId: newDocument.id,
@@ -245,7 +245,7 @@ router.post('/template/:templateId/copy',
     } catch (error) {
       logger.error('Error copying Google Doc template', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         templateId: req.params.templateId,
         error: error.message,
         stack: error.stack
@@ -273,8 +273,8 @@ router.put('/document/:documentId',
     try {
       const { documentId } = req.params;
       const { requests } = req.body;
-      const userId = req.user.id;
-      const userCompanyId = req.user.companyId;
+      const personId = req.person.id;
+    const userCompanyId = req.person.companyId;
       
       if (!documentId) {
         return res.status(400).json({
@@ -297,7 +297,7 @@ router.put('/document/:documentId',
         requests
       );
       
-      logAudit('google_doc_content_updated', userId, 'google-docs', {
+      logAudit('google_doc_content_updated', personId, 'google-docs', {
         userCompanyId,
         documentId,
         requestCount: requests.length,
@@ -316,7 +316,7 @@ router.put('/document/:documentId',
     } catch (error) {
       logger.error('Error updating Google Doc content', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         documentId: req.params.documentId,
         error: error.message,
         stack: error.stack
@@ -350,7 +350,7 @@ router.get('/stats',
     } catch (error) {
       logger.error('Error retrieving Google API stats', {
         service: 'documents-server',
-        userId: req.user?.id,
+        personId: req.person?.id,
         error: error.message
       });
       

@@ -50,4 +50,4 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ resource, action }) => 
   return <Outlet />;
 };
 
-export default ProtectedRoute; 
+export default ProtectedRoute;

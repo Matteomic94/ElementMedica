@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { apiService } from '../services/api';
 import {
   DataExportRequest,
   DataExportFormData,
@@ -31,14 +31,14 @@ export const useDataExport = (): UseDataExportReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.get<GDPRApiResponse<{ exports: DataExportRequest[] }>>(
+      const response = await apiService.get<{ exports: DataExportRequest[] }>(
         '/api/gdpr/export/requests'
       );
       
-      if (response.data.success && response.data.data) {
-        setExportRequests(response.data.data.exports);
+      if (response && response.exports) {
+        setExportRequests(response.exports);
       } else {
-        throw new Error(response.data.error || 'Failed to fetch export requests');
+        throw new Error('Failed to fetch export requests');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch export requests';
@@ -58,14 +58,14 @@ export const useDataExport = (): UseDataExportReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.post<DataExportResponse>('/api/gdpr/export', {
+      const response = await apiService.post<{ exportRequest: DataExportRequest }>('/api/gdpr/export', {
         format: data.format,
         includeAuditTrail: data.includeAuditTrail,
         includeConsents: data.includeConsents
       });
 
-      if (response.data.success && response.data.data) {
-        const newRequest = response.data.data.exportRequest;
+      if (response && response.exportRequest) {
+        const newRequest = response.exportRequest;
         
         // Add to local state
         setExportRequests(prev => [newRequest, ...prev]);

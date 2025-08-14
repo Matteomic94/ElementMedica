@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom';
 import { configure } from '@testing-library/react';
-import { vi, beforeEach, afterEach } from 'vitest';
+import { vi, afterEach } from 'vitest';
 
 // Configure React Testing Library
 configure({ testIdAttribute: 'data-testid' });

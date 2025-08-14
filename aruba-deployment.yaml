@@ -1,0 +1,254 @@
+jpsType: install
+jpsVersion: '1.8'
+id: project-2-0-deployment
+name: 'Project 2.0 - Sistema Medicina del Lavoro'
+description: 'Deployment automatico del sistema completo con backend modulare, frontend React e database PostgreSQL'
+logo: 'https://raw.githubusercontent.com/jelastic/icons/master/nodejs/nodejs-70x70.png'
+version: '1.0.0'
+homepage: 'https://github.com/project-2-0'
+categories:
+  - 'apps/dev-and-admin-tools'
+targetRegions:
+  type: vz7
+
+nodes:
+  - nodeType: nodejs
+    count: 1
+    cloudlets: 8
+    nodeGroup: cp
+    displayName: All-in-One Server (API + Proxy + Documents + DB + Nginx)
+    env:
+      NODE_ENV: production
+      PORT: 4001
+      PROXY_PORT: 4003
+      DOCUMENTS_PORT: 4002
+      DATABASE_URL: "file:./database.db"
+      REDIS_URL: "redis://localhost:6379"
+      SESSION_SECRET: "${fn.password(32)}"
+      JWT_SECRET: "${fn.password(32)}"
+      ENCRYPTION_KEY: "${fn.password(32)}"
+
+globals:
+  APP_DOMAIN: '${env.domain}'
+  ADMIN_EMAIL: 'admin@${env.domain}'
+  ADMIN_PASSWORD: '${fn.password(12)}'
+  DB_FILE: './database.db'
+
+onInstall:
+  - log: "Verifica dipendenze sistema (Redis, Nginx, SQLite già disponibili in Jelastic)..."
+  - log: "Configurazione Redis..."
+  - cmd[cp]: |
+      mkdir -p /var/www/webroot/ROOT/logs /var/www/webroot/ROOT/data/redis
+      chmod 755 /var/www/webroot/ROOT/logs /var/www/webroot/ROOT/data/redis
+      redis-server --daemonize yes --port 6379 --bind 127.0.0.1 --logfile /var/www/webroot/ROOT/logs/redis.log --dir /var/www/webroot/ROOT/data/redis
+
+
+  - log: 'Download e configurazione del codice sorgente...'
+  
+  - cmd[cp]:
+      - 'cd /var/www/webroot/ROOT'
+      - 'git clone https://github.com/matteo-michielon/project-2-0.git . || echo "Repository non trovato, usando codice locale..."'
+      - 'npm install'
+      - 'cd backend && npm install'
+
+  - log: 'Configurazione variabili d''ambiente...'
+  
+  - writeFile:
+      nodeGroup: cp
+      path: '/var/www/webroot/ROOT/.env'
+      body: |
+        NODE_ENV=production
+        PORT=4001
+        PROXY_PORT=4003
+        DOCUMENTS_PORT=4002
+        DATABASE_URL=file:./database.db
+        REDIS_URL=redis://localhost:6379
+        REDIS_ENABLED=true
+        SESSION_SECRET=${fn.password(32)}
+        JWT_SECRET=${fn.password(32)}
+        JWT_REFRESH_SECRET=${fn.password(32)}
+        ENCRYPTION_KEY=${fn.password(32)}
+        ENCRYPTION_ALGORITHM=aes-256-gcm
+        CACHE_TTL_DEFAULT=3600
+        CACHE_TTL_SESSION=86400
+        PERFORMANCE_MONITORING_ENABLED=true
+        SLOW_QUERY_THRESHOLD=1000
+        SLOW_REQUEST_THRESHOLD=2000
+        GDPR_RETENTION_DAYS=2555
+        GDPR_ADMIN_EMAIL=admin@${globals.APP_DOMAIN}
+        GDPR_COMPANY_NAME=Project 2.0
+        GDPR_DPO_EMAIL=dpo@${globals.APP_DOMAIN}
+
+  - log: 'Generazione schema database e migrazione...'
+  
+  - cmd[cp]:
+      - 'cd /var/www/webroot/ROOT/backend'
+      - 'npx prisma generate'
+      - 'npx prisma migrate deploy'
+      - 'npm run seed'
+
+  - log: 'Build del frontend...'
+  
+  - cmd[cp]:
+      - 'cd /var/www/webroot/ROOT'
+      - 'npm run build'
+
+  - log: 'Configurazione Nginx per reverse proxy...'
+  
+  - writeFile:
+      nodeGroup: cp
+      path: '/var/www/webroot/ROOT/nginx.conf'
+      body: |
+        events {
+            worker_connections 1024;
+        }
+        
+        http {
+            default_type application/octet-stream;
+        
+            upstream backend {
+                server localhost:4001;
+            }
+            
+            upstream proxy {
+                server localhost:4003;
+            }
+            
+            server {
+                listen 80;
+                server_name ${globals.APP_DOMAIN};
+                root /var/www/webroot/ROOT/dist;
+                index index.html;
+            
+                # Gestione file statici
+                location / {
+                    try_files $uri $uri/ /index.html;
+                    expires 1y;
+                    add_header Cache-Control "public, immutable";
+                }
+            
+                # Proxy per API backend (tramite proxy server)
+                location /api/ {
+                    proxy_pass http://proxy;
+                    proxy_http_version 1.1;
+                    proxy_set_header Upgrade $http_upgrade;
+                    proxy_set_header Connection 'upgrade';
+                    proxy_set_header Host $host;
+                    proxy_set_header X-Real-IP $remote_addr;
+                    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                    proxy_set_header X-Forwarded-Proto $scheme;
+                    proxy_cache_bypass $http_upgrade;
+                    proxy_read_timeout 300s;
+                    proxy_connect_timeout 75s;
+                }
+            
+                # Health check (diretto al backend)
+                location /health {
+                    proxy_pass http://backend/health;
+                    access_log off;
+                }
+            
+                # Health check proxy server
+                location /healthz {
+                    proxy_pass http://proxy/healthz;
+                    access_log off;
+                }
+            
+                # Sicurezza headers
+                add_header X-Frame-Options DENY;
+                add_header X-Content-Type-Options nosniff;
+                add_header X-XSS-Protection "1; mode=block";
+                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains";
+            }
+        }
+
+  - log: 'Configurazione PM2 per gestione processi...'
+  
+  - writeFile:
+      nodeGroup: cp
+      path: '/var/www/webroot/ROOT/ecosystem.config.js'
+      body: |
+        module.exports = {
+          apps: [
+            {              name: 'api-server',              script: './backend/servers/api-server.js',              instances: 1,              exec_mode: 'fork',              env: {                NODE_ENV: 'production',                PORT: 4001              },              error_file: './logs/api-error.log',              out_file: './logs/api-out.log',              log_file: './logs/api-combined.log',              time: true,              max_memory_restart: '128M',
+              node_args: '--max-old-space-size=128'
+            },
+            {
+              name: 'proxy-server',
+              script: './backend/servers/proxy-server.js',
+              instances: 1,
+              env: {
+                NODE_ENV: 'production',
+                PORT: 4003
+              },
+              error_file: './logs/proxy-error.log',
+              out_file: './logs/proxy-out.log',
+              log_file: './logs/proxy-combined.log',
+              time: true,
+              max_memory_restart: '64M'            }
+          ]
+        };
+
+  - cmd[cp]:
+      - 'cd /var/www/webroot/ROOT'
+      - 'mkdir -p logs'
+      - 'nginx -c /var/www/webroot/ROOT/nginx.conf'
+      - 'pm2 start ecosystem.config.js'
+      - 'pm2 save'
+
+  - log: 'Riavvio servizi...'
+  
+  - log: 'Configurazione SSL automatico...'
+  
+  - installAddon:
+      id: letsencrypt-ssl-addon
+      nodeGroup: cp
+      settings:
+        customDomains: '${globals.APP_DOMAIN}'
+
+actions:
+  setupMonitoring:
+    cmd[cp]:
+      - 'echo "Monitoring setup completato (PM2 built-in utilizzato)"'
+
+success:
+  text: >
+    🎉 Project 2.0 - Sistema Medicina del Lavoro è stato installato con successo!
+    
+    Architettura Ultra-Ottimizzata (1 Nodo):
+    - All-in-One Server: API + Proxy + SQLite + Redis + Nginx (8 cloudlets = 1GB RAM)
+    
+    Informazioni di accesso:
+    - URL Applicazione: https://${globals.APP_DOMAIN}
+    - Email Admin: ${globals.ADMIN_EMAIL}
+    - Password Admin: ${globals.ADMIN_PASSWORD}
+    
+    Configurazione Database:
+    - Database: SQLite locale (${globals.DB_FILE})
+    - Redis: localhost:6379
+    
+    Servizi Attivi:
+    - API Server (Porta 4001)
+    - Proxy Server (Porta 4003)
+    - Database SQLite
+    - Cache Redis locale
+    - Nginx Reverse Proxy
+    - SSL Certificate (Let's Encrypt)
+     
+     Monitoraggio:
+     - PM2 Dashboard: pm2 monit
+     - Logs: pm2 logs
+     - Status: pm2 status
+     - Health Checks: /health, /healthz
+  
+  email:
+    to: '${user.email}'
+    subject: 'Project 2.0 - Deployment Completato'
+    body: >
+      Il tuo sistema Project 2.0 è stato installato con successo su Aruba Cloud.
+      
+      URL: https://${globals.APP_DOMAIN}
+      Admin: ${globals.ADMIN_EMAIL}
+      Password: ${globals.ADMIN_PASSWORD}
+      
+      Buon lavoro!

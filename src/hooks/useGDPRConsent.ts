@@ -4,14 +4,15 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { apiService } from '../services/api';
 import {
   GDPRConsent,
   ConsentFormData,
   ConsentWithdrawalFormData,
   UseGDPRConsentReturn,
   ConsentsListResponse,
-  ConsentResponse
+  ConsentResponse,
+  ConsentType
 } from '../types/gdpr';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-hot-toast';
@@ -32,12 +33,15 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.get<ConsentsListResponse>('/api/gdpr/consent');
+      const response = await apiService.get<ConsentsListResponse>('/api/gdpr/consents');
       
-      if (response.data.success && response.data.data) {
-        setConsents(response.data.data.consents);
+      if (response && (response as any).success && (response as any).data) {
+        setConsents((response as any).data.consents);
+      } else if (response && (response as any).consents) {
+        // Formato diretto senza wrapper
+        setConsents((response as any).consents);
       } else {
-        throw new Error(response.data.error || 'Failed to fetch consents');
+        throw new Error((response as any)?.error || 'Failed to fetch consents');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch consents';
@@ -57,14 +61,14 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.post<ConsentResponse>('/api/gdpr/consent', {
+      const response = await apiService.post<ConsentResponse>('/api/gdpr/consent', {
         consentType: data.consentType,
         purpose: data.purpose,
         legalBasis: data.legalBasis || 'consent'
       });
 
-      if (response.data.success && response.data.data) {
-        const newConsent = response.data.data.consent;
+      if (response && (response as any).success && (response as any).data) {
+        const newConsent = (response as any).data.consent;
         
         // Update local state
         setConsents(prev => {
@@ -73,8 +77,18 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
         });
 
         toast.success(`Consent granted for ${data.consentType}`);
+      } else if (response && (response as any).consent) {
+        // Formato diretto senza wrapper
+        const newConsent = (response as any).consent;
+        
+        setConsents(prev => {
+          const filtered = prev.filter(c => c.consentType !== newConsent.consentType);
+          return [...filtered, newConsent];
+        });
+
+        toast.success(`Consent granted for ${data.consentType}`);
       } else {
-        throw new Error(response.data.error || 'Failed to grant consent');
+        throw new Error((response as any)?.error || 'Failed to grant consent');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to grant consent';
@@ -95,13 +109,13 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
       setLoading(true);
       setError(null);
 
-      const response = await apiClient.post<ConsentResponse>('/api/gdpr/consent/withdraw', {
+      const response = await apiService.post<ConsentResponse>('/api/gdpr/consent/withdraw', {
         consentType: data.consentType,
         reason: data.reason
       });
 
-      if (response.data.success && response.data.data) {
-        const withdrawnConsent = response.data.data.consent;
+      if (response && (response as any).success && (response as any).data) {
+        const withdrawnConsent = (response as any).data.consent;
         
         // Update local state
         setConsents(prev => 
@@ -113,8 +127,21 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
         );
 
         toast.success(`Consent withdrawn for ${data.consentType}`);
+      } else if (response && (response as any).consent) {
+        // Formato diretto senza wrapper
+        const withdrawnConsent = (response as any).consent;
+        
+        setConsents(prev => 
+          prev.map(consent => 
+            consent.consentType === withdrawnConsent.consentType
+              ? { ...consent, ...withdrawnConsent }
+              : consent
+          )
+        );
+
+        toast.success(`Consent withdrawn for ${data.consentType}`);
       } else {
-        throw new Error(response.data.error || 'Failed to withdraw consent');
+        throw new Error((response as any)?.error || 'Failed to withdraw consent');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to withdraw consent';
@@ -209,7 +236,6 @@ export const useGDPRConsent = (): UseGDPRConsentReturn => {
  */
 export const useSingleConsent = (consentType: string) => {
   const {
-    consents,
     loading,
     error,
     grantConsent,
@@ -224,12 +250,12 @@ export const useSingleConsent = (consentType: string) => {
   const toggle = useCallback(async (purpose: string, reason?: string) => {
     if (isActive) {
       await withdrawConsent({
-        consentType: consentType as any,
+        consentType: consentType as ConsentType,
         reason: reason || 'User requested withdrawal'
       });
     } else {
       await grantConsent({
-        consentType: consentType as any,
+        consentType: consentType as ConsentType,
         purpose
       });
     }

@@ -1,31 +1,17 @@
 import { useMemo } from 'react';
 import { useListQuery, useDetailQuery, useCrudOperations } from '../api/useOptimizedQuery';
 import { companiesApi } from '../../api/companies'; // Assumendo che esista
+import { Company } from '../../types';
 
-// Tipi per Company
-export interface Company {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  province: string;
-  cap: string;
-  vatNumber: string;
-  fiscalCode: string;
-  legalRepresentative: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// Tipi per filtri Company
 
 export interface CompanyFilters {
   search?: string;
-  city?: string;
-  province?: string;
+  citta?: string;
+  provincia?: string;
   page?: number;
   limit?: number;
-  sort?: 'name' | 'createdAt' | 'city';
+  sort?: 'ragioneSociale' | 'createdAt' | 'citta';
   order?: 'asc' | 'desc';
 }
 
@@ -37,7 +23,7 @@ export const useCompaniesOptimized = (filters: CompanyFilters = {}) => {
   const normalizedFilters = useMemo(() => ({
     page: 1,
     limit: 20,
-    sort: 'name' as const,
+    sort: 'ragioneSociale' as const,
     order: 'asc' as const,
     ...filters,
   }), [filters]);
@@ -53,7 +39,7 @@ export const useCompaniesOptimized = (filters: CompanyFilters = {}) => {
         // Trasformazioni dei dati se necessarie
         data: data.data.map(company => ({
           ...company,
-          displayName: `${company.name} - ${company.city}`,
+          displayName: `${company.ragioneSociale} - ${company.citta}`,
         }))
       }),
     }
@@ -114,8 +100,8 @@ export const useCompanyDetail = (id: string) => {
     {
       select: (data: Company) => ({
         ...data,
-        displayName: `${data.name} - ${data.city}`,
-        fullAddress: `${data.address}, ${data.city} ${data.province} ${data.cap}`,
+        displayName: `${data.ragioneSociale} - ${data.citta}`,
+        fullAddress: `${data.sedeAzienda}, ${data.citta} ${data.provincia} ${data.cap}`,
       }),
     }
   );
@@ -159,12 +145,12 @@ export const useCompaniesStats = () => {
     if (!companies.length) return null;
     
     const byProvince = companies.reduce((acc, company) => {
-      acc[company.province] = (acc[company.province] || 0) + 1;
+      acc[company.provincia] = (acc[company.provincia] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     
     const byCity = companies.reduce((acc, company) => {
-      acc[company.city] = (acc[company.city] || 0) + 1;
+      acc[company.citta] = (acc[company.citta] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
     
@@ -173,10 +159,10 @@ export const useCompaniesStats = () => {
       byProvince,
       byCity,
       topProvinces: Object.entries(byProvince)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
         .slice(0, 5),
       topCities: Object.entries(byCity)
-        .sort(([,a], [,b]) => b - a)
+        .sort(([,a], [,b]) => (b as number) - (a as number))
         .slice(0, 10),
     };
   }, [companies]);

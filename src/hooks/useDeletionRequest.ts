@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { apiService } from '../services/api';
 import {
   DeletionRequest,
   DeletionRequestFormData,

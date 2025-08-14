@@ -6,7 +6,7 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { body, validationResult } from 'express-validator';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma-optimization.js';
 import { AdvancedJWTService } from '../auth/jwt-advanced.js';
 import { GDPRService } from '../services/gdpr-service.js';
 import {
@@ -20,7 +20,7 @@ import {
 import logger from '../utils/logger.js';
 
 const router = express.Router();
-const prisma = new PrismaClient();
+// Prisma client importato dalla configurazione ottimizzata
 
 /**
  * Enhanced Login with refresh tokens and session management
@@ -48,20 +48,17 @@ router.post('/login',
             
             const { email, password, rememberMe = false, deviceName } = req.body;
             
-            // Find user with roles
-            const user = await prisma.user.findUnique({
+            // Find person with roles
+            const person = await prisma.person.findUnique({
                 where: { email },
                 include: {
-                    userRoles: {
-                        where: { isActive: true },
-                        include: {
-                            role: true
-                        }
+                    personRoles: {
+                        where: {}
                     }
                 }
             });
             
-            if (!user || !user.isActive) {
+            if (!person || person.status !== 'ACTIVE') {
                 return res.status(401).json({
                     error: 'Invalid credentials',
                     code: 'AUTH_INVALID_CREDENTIALS'
@@ -69,8 +66,8 @@ router.post('/login',
             }
             
             // Check if account is locked
-            if (user.lockedUntil && user.lockedUntil > new Date()) {
-                const remainingTime = Math.ceil((user.lockedUntil - new Date()) / (1000 * 60));
+            if (person.lockedUntil && person.lockedUntil > new Date()) {
+                const remainingTime = Math.ceil((person.lockedUntil - new Date()) / (1000 * 60));
                 return res.status(423).json({
                     error: 'Account temporarily locked',
                     code: 'AUTH_ACCOUNT_LOCKED',
@@ -79,7 +76,7 @@ router.post('/login',
             }
             
             // Verify password
-            const isValidPassword = await bcrypt.compare(password, user.password);
+            const isValidPassword = await bcrypt.compare(password, person.password);
             if (!isValidPassword) {
                 return res.status(401).json({
                     error: 'Invalid credentials',
@@ -89,11 +86,11 @@ router.post('/login',
             
             // Check concurrent session limits
             const maxSessions = parseInt(process.env.MAX_CONCURRENT_SESSIONS) || 3;
-            await AdvancedJWTService.cleanupExpiredSessions(user.id);
+            await AdvancedJWTService.cleanupExpiredSessions(person.id);
             
-            const activeSessions = await prisma.userSession.count({
+            const activeSessions = await prisma.personSession.count({
                 where: {
-                    userId: user.id,
+                    personId: person.id,
                     isActive: true,
                     expiresAt: {
                         gt: new Date()
@@ -103,9 +100,9 @@ router.post('/login',
             
             if (activeSessions >= maxSessions) {
                 // Deactivate oldest session
-                const oldestSession = await prisma.userSession.findFirst({
+                const oldestSession = await prisma.personSession.findFirst({
                     where: {
-                        userId: user.id,
+                        personId: person.id,
                         isActive: true,
                         expiresAt: {
                             gt: new Date()
@@ -117,7 +114,7 @@ router.post('/login',
                 });
                 
                 if (oldestSession) {
-                    await prisma.userSession.update({
+                    await prisma.personSession.update({
                         where: { id: oldestSession.id },
                         data: { isActive: false }
                     });
@@ -129,9 +126,9 @@ router.post('/login',
                 ? parseInt(process.env.EXTENDED_SESSION_TIMEOUT_HOURS) || 720 // 30 days
                 : parseInt(process.env.SESSION_TIMEOUT_MINUTES) || 60; // 1 hour
             
-            const session = await prisma.userSession.create({
+            const session = await prisma.personSession.create({
                 data: {
-                    userId: user.id,
+                    personId: person.id,
                     deviceFingerprint: req.deviceFingerprint,
                     deviceName: deviceName || 'Unknown Device',
                     ipAddress: req.ip,
@@ -143,14 +140,14 @@ router.post('/login',
             });
             
             // Generate tokens
-            const tokens = await AdvancedJWTService.generateTokens(user.id, session.id, {
+            const tokens = await AdvancedJWTService.generateTokens(person.id, session.id, {
                 rememberMe,
                 deviceFingerprint: req.deviceFingerprint
             });
             
-            // Update user login info
-            await prisma.user.update({
-                where: { id: user.id },
+            // Update person login info
+            await prisma.person.update({
+                where: { id: person.id },
                 data: {
                     lastLogin: new Date(),
                     failedLoginAttempts: 0,
@@ -160,7 +157,7 @@ router.post('/login',
             
             // Record GDPR consent for authentication
             await GDPRService.recordConsent(
-                user.id,
+                person.id,
                 'authentication',
                 'User authentication and session management',
                 'legitimate_interest'
@@ -168,7 +165,7 @@ router.post('/login',
             
             // Log successful login
             await GDPRService.logGDPRActivity({
-                userId: user.id,
+                personId: person.id,
                 action: 'USER_LOGIN',
                 dataType: 'authentication',
                 purpose: 'User authentication',
@@ -182,11 +179,11 @@ router.post('/login',
                 userAgent: req.get('User-Agent')
             });
             
-            logger.info('User logged in successfully', {
+            logger.info('Person logged in successfully', {
                 component: 'auth-advanced',
                 action: 'login',
-                userId: user.id,
-                email: user.email,
+                personId: person.id,
+                email: person.email,
                 sessionId: session.id,
                 ip: req.ip,
                 rememberMe
@@ -194,13 +191,13 @@ router.post('/login',
             
             res.json({
                 message: 'Login successful',
-                user: {
-                    id: user.id,
-                    email: user.email,
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    companyId: user.companyId,
-                    roles: user.userRoles.map(ur => ur.role.name)
+                person: {
+                    id: person.id,
+                    email: person.email,
+                    firstName: person.firstName,
+                    lastName: person.lastName,
+                    companyId: person.companyId,
+                    roles: person.personRoles.map(pr => pr.roleType)
                 },
                 tokens: {
                     accessToken: tokens.accessToken,
@@ -261,7 +258,7 @@ router.post('/refresh',
             
             // Log token refresh
             await GDPRService.logGDPRActivity({
-                userId: result.userId,
+                personId: result.personId,
                 action: 'TOKEN_REFRESHED',
                 dataType: 'authentication',
                 purpose: 'Token refresh for continued access',
@@ -276,7 +273,7 @@ router.post('/refresh',
             logger.info('Tokens refreshed successfully', {
                 component: 'auth-advanced',
                 action: 'refresh',
-                userId: result.userId,
+                personId: result.personId,
                 sessionId: result.sessionId,
                 ip: req.ip
             });
@@ -313,14 +310,14 @@ router.post('/logout',
     authenticateAdvanced,
     async (req, res) => {
         try {
-            const { sessionId, userId } = req.user;
+            const { sessionId, personId } = req.person;
             
             // Revoke all tokens for this session
             await AdvancedJWTService.revokeSession(sessionId);
             
             // Log logout
             await GDPRService.logGDPRActivity({
-                userId,
+                personId: personId,
                 action: 'USER_LOGOUT',
                 dataType: 'authentication',
                 purpose: 'User logout and session cleanup',
@@ -335,7 +332,7 @@ router.post('/logout',
             logger.info('User logged out successfully', {
                 component: 'auth-advanced',
                 action: 'logout',
-                userId,
+                personId,
                 sessionId,
                 ip: req.ip
             });
@@ -349,7 +346,7 @@ router.post('/logout',
                 component: 'auth-advanced',
                 action: 'logout',
                 error: error.message,
-                userId: req.user?.userId,
+                personId: req.person?.personId,
                 ip: req.ip
             });
             
@@ -368,14 +365,14 @@ router.post('/logout-all',
     authenticateAdvanced,
     async (req, res) => {
         try {
-            const { userId } = req.user;
+            const { personId } = req.person;
             
             // Revoke all user sessions
-            await AdvancedJWTService.revokeAllUserSessions(userId);
+            await AdvancedJWTService.revokeAllPersonSessions(personId);
             
             // Log logout from all devices
             await GDPRService.logGDPRActivity({
-                userId,
+                personId: personId,
                 action: 'USER_LOGOUT_ALL',
                 dataType: 'authentication',
                 purpose: 'User logout from all devices',
@@ -390,7 +387,7 @@ router.post('/logout-all',
             logger.info('User logged out from all devices', {
                 component: 'auth-advanced',
                 action: 'logout-all',
-                userId,
+                personId,
                 ip: req.ip
             });
             
@@ -403,7 +400,7 @@ router.post('/logout-all',
                 component: 'auth-advanced',
                 action: 'logout-all',
                 error: error.message,
-                userId: req.user?.userId,
+                personId: req.person?.personId,
                 ip: req.ip
             });
             
@@ -422,11 +419,11 @@ router.get('/sessions',
     authenticateAdvanced,
     async (req, res) => {
         try {
-            const { userId } = req.user;
+            const { personId } = req.person;
             
-            const sessions = await prisma.userSession.findMany({
+            const sessions = await prisma.personSession.findMany({
                 where: {
-                    userId,
+                    personId: personId,
                     isActive: true,
                     expiresAt: {
                         gt: new Date()
@@ -435,12 +432,8 @@ router.get('/sessions',
                 select: {
                     id: true,
                     deviceName: true,
-                    deviceFingerprint: true,
-                    ipAddress: true,
-                    userAgent: true,
-                    createdAt: true,
                     lastActivityAt: true,
-                    expiresAt: true
+                    createdAt: true
                 },
                 orderBy: {
                     lastActivityAt: 'desc'
@@ -450,7 +443,7 @@ router.get('/sessions',
             // Mark current session
             const sessionsWithCurrent = sessions.map(session => ({
                 ...session,
-                isCurrent: session.id === req.user.sessionId
+                isCurrent: session.id === req.person.sessionId
             }));
             
             res.json({
@@ -463,7 +456,7 @@ router.get('/sessions',
                 component: 'auth-advanced',
                 action: 'getSessions',
                 error: error.message,
-                userId: req.user?.userId
+                personId: req.person?.personId
             });
             
             res.status(500).json({
@@ -481,14 +474,14 @@ router.delete('/sessions/:sessionId',
     authenticateAdvanced,
     async (req, res) => {
         try {
-            const { userId } = req.user;
+            const { personId } = req.person;
             const { sessionId } = req.params;
             
             // Verify session belongs to user
-            const session = await prisma.userSession.findFirst({
+            const session = await prisma.personSession.findFirst({
                 where: {
                     id: sessionId,
-                    userId
+                    personId: personId
                 }
             });
             
@@ -504,7 +497,7 @@ router.delete('/sessions/:sessionId',
             
             // Log session revocation
             await GDPRService.logGDPRActivity({
-                userId,
+                personId: personId,
                 action: 'SESSION_REVOKED',
                 dataType: 'authentication',
                 purpose: 'Manual session revocation',
@@ -519,7 +512,7 @@ router.delete('/sessions/:sessionId',
             logger.info('Session revoked successfully', {
                 component: 'auth-advanced',
                 action: 'revokeSession',
-                userId,
+                personId,
                 revokedSessionId: sessionId,
                 ip: req.ip
             });
@@ -533,7 +526,7 @@ router.delete('/sessions/:sessionId',
                 component: 'auth-advanced',
                 action: 'revokeSession',
                 error: error.message,
-                userId: req.user?.userId,
+                personId: req.person?.personId,
                 sessionId: req.params?.sessionId
             });
             
@@ -576,7 +569,7 @@ router.post('/verify',
                 component: 'auth-advanced',
                 action: 'verify',
                 error: error.message,
-                userId: req.user?.userId
+                personId: req.person?.personId
             });
             
             res.status(500).json({
@@ -594,7 +587,7 @@ router.get('/permissions',
     authenticateAdvanced,
     async (req, res) => {
         try {
-            const { permissions, roles } = req.user;
+            const { permissions, roles } = req.person;
             
             res.json({
                 permissions,
@@ -606,7 +599,7 @@ router.get('/permissions',
                 component: 'auth-advanced',
                 action: 'getPermissions',
                 error: error.message,
-                userId: req.user?.userId
+                personId: req.person?.personId
             });
             
             res.status(500).json({

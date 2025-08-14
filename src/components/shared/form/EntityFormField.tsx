@@ -46,6 +46,8 @@ interface EntityFormFieldProps {
   helpText?: string;
   /** Se il campo select è ricercabile */
   searchable?: boolean;
+  /** Se il campo deve essere multilinea (textarea) */
+  multiline?: boolean;
   /** Proprietà HTML aggiuntive */
   [key: string]: any;
 }
@@ -73,8 +75,11 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
   variant = 'default',
   helpText,
   searchable = false,
+  multiline = false,
   ...rest
 }) => {
+  // Se multiline è true, forza il tipo a textarea
+  const fieldType = multiline ? 'textarea' : type;
   // State for select search
   const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -93,10 +98,10 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
   
   // Reset search term when value changes or component mounts
   useEffect(() => {
-    if (type === 'select' && searchable && value) {
+    if (fieldType === 'select' && searchable && value) {
       setSearchTerm('');
     }
-  }, [value, type, searchable]);
+  }, [value, fieldType, searchable]);
   
   // Handle direct input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -147,7 +152,7 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
     shadow-sm focus:outline-none focus:ring-2 
     transition-colors duration-200
     ${variantClasses[variant]}
-    ${type !== 'textarea' ? sizeClasses[size] : ''}
+    ${fieldType !== 'textarea' ? sizeClasses[size] : ''}
     ${leftIcon ? 'pl-10' : ''}
     ${rightIcon ? 'pr-10' : ''}
   `;
@@ -163,7 +168,7 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
   
   // Renderizza il campo appropriato in base al tipo
   const renderField = () => {
-    switch (type) {
+    switch (fieldType) {
       case 'textarea':
         return (
           <textarea
@@ -342,7 +347,7 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
             <input
               id={name}
               name={name}
-              type={type}
+              type={fieldType}
               value={displayValue}
               onChange={handleInputChange}
               className={`${baseInputClass} px-3`}
@@ -384,4 +389,4 @@ const EntityFormField: React.FC<EntityFormFieldProps> = ({
   );
 };
 
-export default EntityFormField; 
+export default EntityFormField;

@@ -33,7 +33,7 @@ const swaggerOptions = {
         description: 'Development server - Main API v1'
       },
       {
-        url: 'http://localhost:4001/api/v1',
+        url: 'http://api:4001/api/v1',
         description: 'Development server - API Server v1'
       },
       {

@@ -1,0 +1,152 @@
+{
+  "jpsType": "install",
+  "jpsVersion": "1.8",
+  "id": "project-2-0-deployment",
+  "name": "Project 2.0 - Sistema Medicina del Lavoro",
+  "description": "Deployment automatico del sistema completo con backend modulare, frontend React e database PostgreSQL",
+  "logo": "https://raw.githubusercontent.com/jelastic/icons/master/nodejs/nodejs-70x70.png",
+  "version": "1.0.0",
+  "homepage": "https://github.com/project-2-0",
+  "categories": ["apps/dev-and-admin-tools"],
+  "targetRegions": {
+    "type": "vz7"
+  },
+  "nodes": [
+    {
+      "nodeType": "nodejs",
+      "count": 1,
+      "cloudlets": 8,
+      "nodeGroup": "cp",
+      "displayName": "All-in-One Server (API + Proxy + Documents + DB + Nginx)",
+      "env": {
+        "NODE_ENV": "production",
+        "PORT": "4001",
+        "PROXY_PORT": "4003",
+        "DOCUMENTS_PORT": "4002",
+        "DATABASE_URL": "file:./database.db",
+        "REDIS_URL": "redis://localhost:6379",
+        "SESSION_SECRET": "${fn.password(32)}",
+        "JWT_SECRET": "${fn.password(32)}",
+        "ENCRYPTION_KEY": "${fn.password(32)}"
+      }
+    }
+  ],
+  "globals": {
+    "DB_FILE": "./database.db",
+    "APP_DOMAIN": "${env.domain}",
+    "ADMIN_EMAIL": "admin@${env.domain}",
+    "ADMIN_PASSWORD": "${fn.password(12)}"
+  },
+  "onInstall": [
+    {
+      "log": "Verifica dipendenze sistema (Redis, Nginx, SQLite già disponibili in Jelastic)..."
+    },
+    {
+      "log": "Configurazione Redis..."
+    },
+    {
+      "cmd[cp]": [
+        "mkdir -p /var/www/webroot/ROOT/logs /var/www/webroot/ROOT/data/redis",
+        "chmod 755 /var/www/webroot/ROOT/logs /var/www/webroot/ROOT/data/redis",
+        "redis-server --daemonize yes --port 6379 --bind 127.0.0.1 --logfile /var/www/webroot/ROOT/logs/redis.log --dir /var/www/webroot/ROOT/data/redis"
+      ]
+    },
+    {
+      "log": "Download e configurazione del codice sorgente..."
+    },
+    {
+      "cmd[cp]": [
+        "cd /var/www/webroot/ROOT",
+        "git clone https://github.com/matteo-michielon/project-2-0.git . || echo 'Repository non trovato, usando codice locale...'",
+        "npm install",
+        "cd backend && npm install"
+      ]
+    },
+    {
+      "log": "Configurazione variabili d'ambiente..."
+    },
+    {
+      "writeFile": {
+        "nodeGroup": "cp",
+        "path": "/var/www/webroot/ROOT/.env",
+        "body": "NODE_ENV=production\nPORT=4001\nPROXY_PORT=4003\nDOCUMENTS_PORT=4002\nDATABASE_URL=file:./database.db\nREDIS_URL=redis://localhost:6379\nREDIS_ENABLED=true\nSESSION_SECRET=${fn.password(32)}\nJWT_SECRET=${fn.password(32)}\nJWT_REFRESH_SECRET=${fn.password(32)}\nENCRYPTION_KEY=${fn.password(32)}\nENCRYPTION_ALGORITHM=aes-256-gcm\nCACHE_TTL_DEFAULT=3600\nCACHE_TTL_SESSION=86400\nPERFORMANCE_MONITORING_ENABLED=true\nSLOW_QUERY_THRESHOLD=1000\nSLOW_REQUEST_THRESHOLD=2000\nGDPR_RETENTION_DAYS=2555\nGDPR_ADMIN_EMAIL=admin@${globals.APP_DOMAIN}\nGDPR_COMPANY_NAME=Project 2.0\nGDPR_DPO_EMAIL=dpo@${globals.APP_DOMAIN}"
+      }
+    },
+    {
+      "log": "Generazione schema database e migrazione..."
+    },
+    {
+      "cmd[cp]": [
+        "cd /var/www/webroot/ROOT/backend",
+        "npx prisma generate",
+        "npx prisma migrate deploy",
+        "npm run seed"
+      ]
+    },
+    {
+      "log": "Build del frontend..."
+    },
+    {
+      "cmd[cp]": [
+        "cd /var/www/webroot/ROOT",
+        "npm run build"
+      ]
+    },
+    {
+      "log": "Configurazione Nginx per reverse proxy..."
+    },
+    {
+      "writeFile": {
+        "nodeGroup": "cp",
+        "path": "/var/www/webroot/ROOT/nginx.conf",
+        "body": "events {\n    worker_connections 1024;\n}\n\nhttp {\n    default_type application/octet-stream;\n\n    upstream backend {\n        server localhost:4001;\n    }\n\n    upstream proxy {\n        server localhost:4003;\n    }\n\n    server {\n        listen 80;\n        server_name ${globals.APP_DOMAIN};\n        root /var/www/webroot/ROOT/dist;\n        index index.html;\n\n        # Gestione file statici\n        location / {\n            try_files $uri $uri/ /index.html;\n            expires 1y;\n            add_header Cache-Control \"public, immutable\";\n        }\n\n        # Proxy per API backend (tramite proxy server)\n        location /api/ {\n            proxy_pass http://proxy;\n            proxy_http_version 1.1;\n            proxy_set_header Upgrade $http_upgrade;\n            proxy_set_header Connection 'upgrade';\n            proxy_set_header Host $host;\n            proxy_set_header X-Real-IP $remote_addr;\n            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n            proxy_set_header X-Forwarded-Proto $scheme;\n            proxy_cache_bypass $http_upgrade;\n            proxy_read_timeout 300s;\n            proxy_connect_timeout 75s;\n        }\n\n        # Health check (diretto al backend)\n        location /health {\n            proxy_pass http://backend/health;\n            access_log off;\n        }\n\n        # Health check proxy server\n        location /healthz {\n            proxy_pass http://proxy/healthz;\n            access_log off;\n        }\n\n        # Sicurezza headers\n        add_header X-Frame-Options DENY;\n        add_header X-Content-Type-Options nosniff;\n        add_header X-XSS-Protection \"1; mode=block\";\n        add_header Strict-Transport-Security \"max-age=31536000; includeSubDomains\";\n    }\n}"
+      }
+    },
+    {
+      "log": "Configurazione PM2 per gestione processi..."
+    },
+    {
+      "writeFile": {
+        "nodeGroup": "cp",
+        "path": "/var/www/webroot/ROOT/ecosystem.config.js",
+        "body": "module.exports = {\n  apps: [\n    {\n      name: 'api-server',\n      script: './backend/servers/api-server.js',\n      instances: 1,\n      env: {\n        NODE_ENV: 'production',\n        PORT: 4001\n      },\n      error_file: './logs/api-error.log',\n      out_file: './logs/api-out.log',\n      log_file: './logs/api-combined.log',\n      time: true,\n      max_memory_restart: '128M'\n    },\n    {\n      name: 'proxy-server',\n      script: './backend/servers/proxy-server.js',\n      instances: 1,\n      env: {\n        NODE_ENV: 'production',\n        PORT: 4003\n      },\n      error_file: './logs/proxy-error.log',\n      out_file: './logs/proxy-out.log',\n      log_file: './logs/proxy-combined.log',\n      time: true,\n      max_memory_restart: '64M'\n    }\n  ]\n};"
+      }
+    },
+    {
+      "cmd[cp]": [
+        "cd /var/www/webroot/ROOT",
+        "mkdir -p logs",
+        "nginx -c /var/www/webroot/ROOT/nginx.conf",
+        "pm2 start ecosystem.config.js",
+        "pm2 save"
+      ]
+    },
+    {
+      "log": "Configurazione SSL automatico..."
+    },
+    {
+      "installAddon": {
+        "id": "letsencrypt-ssl-addon",
+        "nodeGroup": "cp",
+        "settings": {
+          "customDomains": "${globals.APP_DOMAIN}"
+        }
+      }
+    }
+  ],
+  "actions": {
+    "setupMonitoring": {
+      "cmd[cp]": [
+        "echo 'Monitoring setup completato (PM2 built-in utilizzato)'"
+      ]
+    }
+  },
+  "success": {
+    "text": "🎉 **Project 2.0 - Sistema Medicina del Lavoro** è stato installato con successo!\n\n**Architettura Ultra-Ottimizzata (1 Nodo):**\n- 🚀 **All-in-One Server**: API + Proxy + SQLite + Redis + Nginx (8 cloudlets = 1GB RAM)\n\n**Informazioni di accesso:**\n- **URL Applicazione**: https://${globals.APP_DOMAIN}\n- **Email Admin**: ${globals.ADMIN_EMAIL}\n- **Password Admin**: ${globals.ADMIN_PASSWORD}\n\n**Configurazione Database:**\n- **Database**: SQLite locale (${globals.DB_FILE})\n- **Redis**: localhost:6379\n\n**Servizi Attivi:**\n- ✅ API Server (Porta 4001) - 128MB RAM\n- ✅ Proxy Server (Porta 4003) - 64MB RAM\n- ✅ Database SQLite\n- ✅ Cache Redis locale\n- ✅ Nginx Reverse Proxy\n- ✅ SSL Certificate (Let's Encrypt)\n\n**Monitoraggio:**\n- PM2 Dashboard: `pm2 monit`\n- Logs: `pm2 logs`\n- Status: `pm2 status`\n- Health Checks: /health, /healthz\n\n**Caratteristiche Implementate:**\n- 🔐 Sistema autenticazione completo\n- 👥 Gestione utenti e ruoli\n- 🏢 Gestione aziende e sedi\n- 📚 Sistema corsi e formazione\n- 📄 Gestione documenti completa\n- 🛡️ Conformità GDPR completa\n- 📊 Audit trail e logging\n- ⚡ Cache Redis per performance\n- 🔒 Sicurezza avanzata\n\n**Ottimizzazioni Estreme:**\n- Architettura all-in-one su singolo nodo\n- SQLite per massima efficienza\n- Redis locale per cache\n- Nginx integrato per reverse proxy\n- Utilizzo ottimizzato risorse (8 cloudlets = 1GB RAM)\n- Memoria ottimizzata: API 128MB, Proxy 64MB\n- Documents server rimosso per efficienza\n\n**Supporto:**\nPer assistenza tecnica, consultare la documentazione nel repository del progetto.",
+    "email": {
+      "to": "${user.email}",
+      "subject": "Project 2.0 - Deployment Completato",
+      "body": "Il tuo sistema Project 2.0 è stato installato con successo su Aruba Cloud.\n\nURL: https://${globals.APP_DOMAIN}\nAdmin: ${globals.ADMIN_EMAIL}\nPassword: ${globals.ADMIN_PASSWORD}\n\nBuon lavoro!"
+    }
+  }
+}

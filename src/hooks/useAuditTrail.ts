@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import apiClient from '../services/apiClient';
+import { apiService } from '../services/api';
 import {
   AuditLogEntry,
   AuditTrailFilters,
@@ -56,21 +56,20 @@ export const useAuditTrail = (initialFilters?: AuditTrailFilters): UseAuditTrail
         params.append('dataType', currentFilters.dataType);
       }
 
-      const response = await apiClient.get<AuditTrailResponse>(
+      const response = await apiService.get<{ auditTrail: AuditLogEntry[]; total: number }>(
         `/api/gdpr/audit-trail?${params.toString()}`
       );
       
-      if (response.data.success && response.data.data) {
-        const { auditTrail: logs, total: totalCount } = response.data.data;
-        setAuditTrail(logs);
-        setTotal(totalCount);
+      if (response && response.auditTrail) {
+        setAuditTrail(response.auditTrail);
+        setTotal(response.total || 0);
         
         // Update filters if new ones were provided
         if (newFilters) {
           setFilters(newFilters);
         }
       } else {
-        throw new Error(response.data.error || 'Failed to fetch audit trail');
+        throw new Error('Failed to fetch audit trail');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch audit trail';
@@ -178,13 +177,13 @@ export const useAuditTrail = (initialFilters?: AuditTrailFilters): UseAuditTrail
       if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
       if (filters.dataType) params.append('dataType', filters.dataType);
 
-      const response = await apiClient.get(
+      const response = await apiService.get(
         `/api/gdpr/audit-trail/export?${params.toString()}`,
         { responseType: 'blob' }
       );
 
       // Create download link
-      const blob = new Blob([response.data], {
+      const blob = new Blob([response], {
         type: format === 'csv' ? 'text/csv' : 'application/json'
       });
       const url = window.URL.createObjectURL(blob);
@@ -278,16 +277,15 @@ export const useAdminAuditTrail = (companyId?: string) => {
       if (filters?.endDate) params.append('endDate', filters.endDate.toISOString());
       if (filters?.dataType) params.append('dataType', filters.dataType);
 
-      const response = await apiClient.get<AuditTrailResponse>(
+      const response = await apiService.get<{ auditTrail: AuditLogEntry[]; total: number }>(
         `/api/gdpr/admin/audit-trail?${params.toString()}`
       );
       
-      if (response.data.success && response.data.data) {
-        const { auditTrail, total } = response.data.data;
-        baseHook.setAuditTrail(auditTrail);
-        baseHook.setTotal(total);
+      if (response && response.auditTrail) {
+        baseHook.setAuditTrail(response.auditTrail);
+        baseHook.setTotal(response.total || 0);
       } else {
-        throw new Error(response.data.error || 'Failed to fetch admin audit trail');
+        throw new Error('Failed to fetch admin audit trail');
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch admin audit trail';

@@ -5,7 +5,7 @@ export async function getCourses() {
   try {
     const courses = await prisma.course.findMany({
       orderBy: {
-        created_at: 'desc',
+        createdAt: 'desc',
       },
     });
     return courses;
@@ -27,7 +27,7 @@ export async function getCourse(id: string) {
   }
 }
 
-export async function createCourse(data: Omit<Course, 'id' | 'created_at' | 'updated_at'>) {
+export async function createCourse(data: Omit<Course, 'id' | 'createdAt' | 'updatedAt'>) {
   try {
     const course = await prisma.course.create({
       data,
@@ -62,4 +62,4 @@ export async function deleteCourse(id: string) {
     console.error('Error deleting course:', error);
     throw error;
   }
-} 
+}

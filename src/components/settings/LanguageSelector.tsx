@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Label } from '../ui/label';
 import { Badge } from '../ui/badge';
-import { useUserPreferences } from '../../hooks/useUserPreferences';
+import { usePreferences } from '../../context/PreferencesContext';
 import { LanguageCode } from '../../types/preferences';
 
 interface LanguageOption {
@@ -67,7 +67,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   className = '',
   showCard = true 
 }) => {
-  const { preferences, updatePreferences, loading } = useUserPreferences();
+  const { preferences, updatePreferences, loading } = usePreferences();
   
   const currentLanguage = preferences?.language || 'it';
   const currentLanguageOption = LANGUAGE_OPTIONS.find(lang => lang.code === currentLanguage);

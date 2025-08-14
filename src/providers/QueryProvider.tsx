@@ -1,6 +1,8 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { sanitizeErrorMessage } from '../utils/errorUtils';
+import { toast } from 'react-hot-toast';
 
 // Configurazione del QueryClient ottimizzata
 const queryClient = new QueryClient({
@@ -48,7 +50,9 @@ const queryClient = new QueryClient({
 queryClient.setMutationDefaults(['create', 'update', 'delete'], {
   onError: (error: any) => {
     console.error('Mutation error:', error);
-    // Qui potresti aggiungere un toast di errore globale
+    // Mostra un toast con errore sanitizzato per le mutazioni fallite
+    const userMessage = sanitizeErrorMessage(error, 'Operazione fallita');
+    toast.error(userMessage);
   },
 });
 
@@ -114,13 +118,13 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {/* DevTools solo in development */}
-      {process.env.NODE_ENV === 'development' && (
+      {/* DevTools disabilitati per evitare riferimenti a "TanStack" nell'UI */}
+      {/* {import.meta.env.DEV && (
         <ReactQueryDevtools 
           initialIsOpen={false}
           position="bottom-right"
         />
-      )}
+      )} */}
     </QueryClientProvider>
   );
 };

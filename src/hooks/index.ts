@@ -60,5 +60,5 @@ export { usePrivacySettings } from './usePrivacySettings';
 export { useGDPRAdmin } from './useGDPRAdmin';
 
 // User Preferences hooks
-export { useUserPreferences } from './useUserPreferences';
+// Removed useUserPreferences - now using unified PreferencesContext
 // useTheme is already exported from './state/useAppState' above

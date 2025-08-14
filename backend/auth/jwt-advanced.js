@@ -5,10 +5,10 @@
 
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
-import { PrismaClient } from '@prisma/client';
+import prisma from '../config/prisma-optimization.js';
 import logger from '../utils/logger.js';
 
-const prisma = new PrismaClient();
+// Prisma client importato dalla configurazione ottimizzata
 
 // JWT Configuration
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -30,10 +30,10 @@ export class AdvancedJWTService {
             await this.cleanupExpiredSessions(user.id);
             
             // Check concurrent session limit
-            const activeSessions = await prisma.refreshToken.count({
+            const activeSessions = await prisma.personSession.count({
                 where: {
-                    userId: user.id,
-                    revokedAt: null,
+                    personId: user.id,
+                    isActive: true,
                     expiresAt: {
                         gt: new Date()
                     }
@@ -41,11 +41,11 @@ export class AdvancedJWTService {
             });
             
             if (activeSessions >= MAX_CONCURRENT_SESSIONS) {
-                // Revoke oldest session
-                const oldestSession = await prisma.refreshToken.findFirst({
+                // Deactivate oldest session
+                const oldestSession = await prisma.personSession.findFirst({
                     where: {
-                        userId: user.id,
-                        revokedAt: null
+                        personId: user.id,
+                        isActive: true
                     },
                     orderBy: {
                         createdAt: 'asc'
@@ -53,13 +53,16 @@ export class AdvancedJWTService {
                 });
                 
                 if (oldestSession) {
-                    await this.revokeRefreshToken(oldestSession.token);
+                    await prisma.personSession.update({
+                        where: { id: oldestSession.id },
+                        data: { isActive: false }
+                    });
                 }
             }
             
             // Generate access token
             const accessTokenPayload = {
-                userId: user.id,
+                personId: user.id,
                 email: user.email,
                 username: user.username,
                 companyId: user.companyId,
@@ -81,32 +84,25 @@ export class AdvancedJWTService {
             const refreshTokenExpiry = new Date();
             refreshTokenExpiry.setTime(refreshTokenExpiry.getTime() + this.parseExpiry(JWT_REFRESH_TOKEN_EXPIRY));
             
-            // Store refresh token in database
-            const refreshToken = await prisma.refreshToken.create({
+            // Create person session record
+            const session = await prisma.personSession.create({
                 data: {
-                    userId: user.id,
-                    token: refreshTokenValue,
-                    expiresAt: refreshTokenExpiry,
-                    deviceInfo: deviceInfo
-                }
-            });
-            
-            // Create user session record
-            await prisma.userSession.create({
-                data: {
-                    userId: user.id,
+                    personId: user.id,
                     sessionToken: accessTokenPayload.sessionId,
                     deviceInfo: deviceInfo,
                     ipAddress: deviceInfo.ipAddress,
                     userAgent: deviceInfo.userAgent,
-                    expiresAt: new Date(Date.now() + this.parseExpiry(JWT_ACCESS_TOKEN_EXPIRY))
+                    refreshToken: refreshTokenValue,
+                    expiresAt: refreshTokenExpiry,
+                    isActive: true,
+                    lastActivityAt: new Date()
                 }
             });
             
             logger.info('Token pair generated successfully', {
                 component: 'jwt-advanced',
                 action: 'generateTokenPair',
-                userId: user.id,
+                personId: user.id,
                 sessionId: accessTokenPayload.sessionId
             });
             
@@ -123,7 +119,7 @@ export class AdvancedJWTService {
                 action: 'generateTokenPair',
                 error: error.message,
                 stack: error.stack,
-                userId: user?.id
+                personId: user?.id
             });
             throw new Error('Token generation failed');
         }
@@ -135,12 +131,15 @@ export class AdvancedJWTService {
     static async refreshAccessToken(refreshTokenValue, deviceInfo = {}) {
         try {
             // Find and validate refresh token
-            const refreshToken = await prisma.refreshToken.findUnique({
-                where: { token: refreshTokenValue },
+            const session = await prisma.personSession.findFirst({
+                where: { 
+                    refreshToken: refreshTokenValue,
+                    isActive: true
+                },
                 include: {
-                    user: {
+                    person: {
                         include: {
-                            userRoles: {
+                            personRoles: {
                                 where: { isActive: true },
                                 include: {
                                     role: true
@@ -151,11 +150,11 @@ export class AdvancedJWTService {
                 }
             });
             
-            if (!refreshToken || refreshToken.revokedAt || refreshToken.expiresAt < new Date()) {
+            if (!session || session.expiresAt < new Date()) {
                 throw new Error('Invalid or expired refresh token');
             }
             
-            const user = refreshToken.user;
+            const user = session.person;
             
             if (!user.isActive) {
                 throw new Error('User account is inactive');
@@ -163,12 +162,12 @@ export class AdvancedJWTService {
             
             // Generate new access token
             const accessTokenPayload = {
-                userId: user.id,
+                personId: user.id,
                 email: user.email,
                 username: user.username,
                 companyId: user.companyId,
-                roles: user.userRoles.map(ur => ur.role.name),
-                permissions: this.aggregatePermissions(user.userRoles),
+                roles: user.personRoles.map(pr => pr.roleType),
+                permissions: this.aggregatePermissions(user.personRoles),
                 sessionId: crypto.randomUUID()
             };
             
@@ -182,13 +181,13 @@ export class AdvancedJWTService {
                 }
             );
             
-            // Update user session
-            await prisma.userSession.upsert({
+            // Update person session
+            await prisma.personSession.upsert({
                 where: {
                     sessionToken: accessTokenPayload.sessionId
                 },
                 create: {
-                    userId: user.id,
+                    personId: user.id,
                     sessionToken: accessTokenPayload.sessionId,
                     deviceInfo: deviceInfo,
                     ipAddress: deviceInfo.ipAddress,
@@ -196,22 +195,24 @@ export class AdvancedJWTService {
                     expiresAt: new Date(Date.now() + this.parseExpiry(JWT_ACCESS_TOKEN_EXPIRY))
                 },
                 update: {
-                    lastActivity: new Date(),
+                    lastActivityAt: new Date(),
                     ipAddress: deviceInfo.ipAddress,
                     userAgent: deviceInfo.userAgent
                 }
             });
             
-            // Update user last login
-            await prisma.user.update({
-                where: { id: user.id },
+            // Update person last login
+            await prisma.person.update({
+                where: { 
+                    id: user.id
+                },
                 data: { lastLogin: new Date() }
             });
             
             logger.info('Access token refreshed successfully', {
                 component: 'jwt-advanced',
                 action: 'refreshAccessToken',
-                userId: user.id,
+                personId: user.id,
                 sessionId: accessTokenPayload.sessionId
             });
             
@@ -243,12 +244,12 @@ export class AdvancedJWTService {
             });
             
             // Check if session is still active
-            const session = await prisma.userSession.findUnique({
+            const session = await prisma.personSession.findUnique({
                 where: { sessionToken: decoded.sessionId },
                 include: {
-                    user: {
+                    person: {
                         include: {
-                            userRoles: {
+                            personRoles: {
                                 where: { isActive: true },
                                 include: {
                                     role: true
@@ -263,20 +264,20 @@ export class AdvancedJWTService {
                 throw new Error('Session expired or invalid');
             }
             
-            if (!session.user.isActive) {
-                throw new Error('User account is inactive');
+            if (session.person.status !== 'ACTIVE') {
+                throw new Error('Person account is inactive');
             }
             
             // Update last activity
-            await prisma.userSession.update({
+            await prisma.personSession.update({
                 where: { sessionToken: decoded.sessionId },
-                data: { lastActivity: new Date() }
+                data: { lastActivityAt: new Date() }
             });
             
             return {
                 ...decoded,
-                roles: session.user.userRoles.map(ur => ur.role.name),
-                permissions: this.aggregatePermissions(session.user.userRoles)
+                roles: session.person.personRoles.map(pr => pr.role.name),
+                permissions: this.aggregatePermissions(session.person.personRoles)
             };
             
         } catch (error) {
@@ -294,9 +295,9 @@ export class AdvancedJWTService {
      */
     static async revokeRefreshToken(refreshTokenValue) {
         try {
-            await prisma.refreshToken.update({
-                where: { token: refreshTokenValue },
-                data: { revokedAt: new Date() }
+            await prisma.personSession.updateMany({
+                where: { refreshToken: refreshTokenValue },
+                data: { isActive: false }
             });
             
             logger.info('Refresh token revoked', {
@@ -317,58 +318,49 @@ export class AdvancedJWTService {
     /**
      * Revoke all user sessions
      */
-    static async revokeAllUserSessions(userId) {
+    static async revokeAllPersonSessions(personId) {
         try {
-            // Revoke all refresh tokens
-            await prisma.refreshToken.updateMany({
+            // Deactivate all person sessions
+            await prisma.personSession.updateMany({
                 where: {
-                    userId: userId,
-                    revokedAt: null
-                },
-                data: { revokedAt: new Date() }
-            });
-            
-            // Deactivate all user sessions
-            await prisma.userSession.updateMany({
-                where: {
-                    userId: userId,
+                    personId: personId,
                     isActive: true
                 },
                 data: { isActive: false }
             });
             
-            logger.info('All user sessions revoked', {
+            logger.info('All person sessions revoked', {
                 component: 'jwt-advanced',
-                action: 'revokeAllUserSessions',
-                userId: userId
+                action: 'revokeAllPersonSessions',
+                personId: personId
             });
             
         } catch (error) {
             logger.error('Failed to revoke all user sessions', {
                 component: 'jwt-advanced',
-                action: 'revokeAllUserSessions',
+                action: 'revokeAllPersonSessions',
                 error: error.message,
-                userId: userId
+                personId: personId
             });
             throw error;
         }
     }
     
     /**
-     * Get user active sessions
+     * Get person active sessions
      */
-    static async getUserSessions(userId) {
+    static async getPersonSessions(personId) {
         try {
-            const sessions = await prisma.userSession.findMany({
+            const sessions = await prisma.personSession.findMany({
                 where: {
-                    userId: userId,
+                    personId: personId,
                     isActive: true,
                     expiresAt: {
                         gt: new Date()
                     }
                 },
                 orderBy: {
-                    lastActivity: 'desc'
+                    lastActivityAt: 'desc'
                 }
             });
             
@@ -386,7 +378,7 @@ export class AdvancedJWTService {
                 component: 'jwt-advanced',
                 action: 'getUserSessions',
                 error: error.message,
-                userId: userId
+                personId: personId
             });
             throw error;
         }
@@ -395,7 +387,7 @@ export class AdvancedJWTService {
     /**
      * Cleanup expired sessions
      */
-    static async cleanupExpiredSessions(userId = null) {
+    static async cleanupExpiredSessions(personId = null) {
         try {
             const where = {
                 expiresAt: {
@@ -403,15 +395,12 @@ export class AdvancedJWTService {
                 }
             };
             
-            if (userId) {
-                where.userId = userId;
+            if (personId) {
+                where.personId = personId;
             }
             
-            // Remove expired refresh tokens
-            await prisma.refreshToken.deleteMany({ where });
-            
-            // Deactivate expired user sessions
-            await prisma.userSession.updateMany({
+            // Deactivate expired person sessions
+            await prisma.personSession.updateMany({
                 where,
                 data: { isActive: false }
             });
@@ -419,7 +408,7 @@ export class AdvancedJWTService {
             logger.info('Expired sessions cleaned up', {
                 component: 'jwt-advanced',
                 action: 'cleanupExpiredSessions',
-                userId: userId
+                personId: personId
             });
             
         } catch (error) {
@@ -427,7 +416,7 @@ export class AdvancedJWTService {
                 component: 'jwt-advanced',
                 action: 'cleanupExpiredSessions',
                 error: error.message,
-                userId: userId
+                personId: personId
             });
         }
     }
@@ -453,18 +442,39 @@ export class AdvancedJWTService {
     }
     
     /**
-     * Aggregate permissions from user roles
+     * Aggregate permissions from person roles
      */
-    static aggregatePermissions(userRoles) {
+    static aggregatePermissions(personRoles) {
         const permissions = new Set();
         
-        userRoles.forEach(userRole => {
-            if (userRole.role.permissions) {
-                const rolePermissions = Array.isArray(userRole.role.permissions) 
-                    ? userRole.role.permissions 
-                    : JSON.parse(userRole.role.permissions || '[]');
+        personRoles.forEach(personRole => {
+            // Add basic role-based permissions
+            switch(personRole.roleType) {
+                case 'SUPER_ADMIN':
+                    permissions.add('ALL_PERMISSIONS');
+                    break;
+                case 'ADMIN':
+                    permissions.add('MANAGE_USERS');
+                    permissions.add('MANAGE_COMPANIES');
+                    permissions.add('MANAGE_COURSES');
+                    permissions.add('VIEW_REPORTS');
+                    break;
+                case 'MANAGER':
+                    permissions.add('MANAGE_COURSES');
+                    permissions.add('VIEW_REPORTS');
+                    break;
+                case 'USER':
+                    permissions.add('VIEW_COURSES');
+                    break;
+            }
+            
+            // Add custom permissions if available
+            if (personRole.permissions) {
+                const customPermissions = Array.isArray(personRole.permissions) 
+                    ? personRole.permissions 
+                    : JSON.parse(personRole.permissions || '[]');
                     
-                rolePermissions.forEach(permission => permissions.add(permission));
+                customPermissions.forEach(permission => permissions.add(permission));
             }
         });
         

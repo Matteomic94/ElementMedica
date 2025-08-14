@@ -382,8 +382,8 @@ class CacheService {
     return await this.del(key);
   }
 
-  async invalidateUserDocuments(userId) {
-    const pattern = `document:*:user:${userId}`;
+  async invalidateUserDocuments(personId) {
+    const pattern = `document:*:user:${personId}`;
     return await this.invalidatePattern(pattern);
   }
 

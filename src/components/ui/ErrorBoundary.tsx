@@ -1,4 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { sanitizeErrorMessage } from '../../utils/errorUtils';
 import { cn } from '../../design-system/utils';
 
 /**
@@ -77,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <details className="mb-4 p-3 bg-red-100 rounded text-sm text-red-800 max-w-full overflow-auto">
               <summary className="cursor-pointer font-medium">Error Details</summary>
               <pre className="mt-2 whitespace-pre-wrap">
-                {this.state.error.message}\n{this.state.error.stack}
+                {sanitizeErrorMessage(this.state.error, 'Si è verificato un errore nell\'applicazione')}\n{process.env.NODE_ENV === 'development' ? this.state.error.stack : ''}
               </pre>
             </details>
           )}

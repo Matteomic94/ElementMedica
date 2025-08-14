@@ -58,7 +58,7 @@ function UsersList() {
     loading,
     error,
     refetch
-  } = useFetch<User[]>('http://localhost:4000/users');
+  } = useFetch<User[]>('/api/users');
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
@@ -290,4 +290,4 @@ When creating a new custom hook:
 3. **Handle errors gracefully**: All hooks that interact with external resources should handle errors.
 4. **Include loading states**: For async operations, include loading state management.
 5. **Use callback patterns**: Use useCallback for handlers to prevent unnecessary rerenders.
-6. **Cleanup effects**: Remember to clean up side effects in useEffect returns. 
+6. **Cleanup effects**: Remember to clean up side effects in useEffect returns.
